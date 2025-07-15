@@ -1,0 +1,24 @@
+{
+    "title": "SVG Info",
+    "description": "An Electron app to handle SVG files",
+    "version": "1.0.0",
+    "fontName": "SVGIcons",
+    "icons" : [
+        {
+            "name": "icon1",
+            "data" : "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><circle cx=\"16\" cy=\"16\" r=\"12\" fill=\"blue\"/></svg>",
+            "sizes": "32x32",
+            "code": "",
+            "category": ["circle", "blue", "icon"],
+            "updated": "2023-10-01 12:00:00"
+        },
+        {
+            "name": "icon2",
+            "data" : "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\"><rect width=\"32\" height=\"32\" fill=\"red\"/></svg>",
+            "sizes": "32x32",
+            "code": "",
+            "category": ["rectangle", "red", "icon"],
+            "updated": "2023-10-01 12:00:00"
+        }
+    ]
+}

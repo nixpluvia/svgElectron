@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>SVG Icon Manager</title>
+    
+    <link rel="stylesheet" href="./resources/css/common.css">
+    <link rel="stylesheet" href="./resources/css/common.css">
+	<link rel="stylesheet" href="./resources/css/style.css">
+	<link rel="stylesheet" href="./resources/css/components.css">
+	<link rel="stylesheet" href="./resources/css/layout.css">
+	<link rel="stylesheet" href="./resources/css/main.css">
+
+    <!-- dayjs -->
+	<script src="./resources/js/dayjs/dayjs.min.js"></script>
+	<script src="./resources/js/dayjs/relativeTime.js"></script>
+    
+    <script src="./resources/js/core.js"></script>
+    <script src="./resources/js/components.js"></script>
+    <script src="./resources/js/common.js"></script>
+    <script src="./resources/js/svg.min.js"></script>
+    <script src="./resources/js/svg.topath.min.js"></script>
+
+    <style>
+        .card-header svg {display: block; max-height: 100%; margin: 0 auto;}
+    </style>
+</head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+            <div class="header-top">
+                <h1 class="logo">
+                    <button type="button" id="toggleInfo">
+                        <svg class="bi me-2 flex-shrink-0" width="40" height="40" aria-hidden="true">
+                            <use xlink:href="#mark"></use>
+                        </svg>
+                        <strong>SVG Icon Manager</strong>
+                    </button>
+                </h1>
+    
+                <div class="utils">
+                    <div class="d-flex gap-3 col-auto ms-auto">
+                        <button type="button" class="btn" data-level="2" data-size="sm" onclick="showGuideModal()">사용 가이드</button>
+                    </div>
+                    <div class="btn-group" data-dropbox-wrap="hdDrop2">
+                        <button type="button" class="btn btn-main" data-level="2" data-size="sm" onclick="selectJson()">JSON 불러오기</button>
+                        <button type="button" class="btn btn-sub" data-level="2" data-size="sm" data-dropbox-trigger="hdDrop2">+</button>
+                        <div class="dropbox-content p-12 ani" data-dropbox-target="hdDrop2">
+                            <ul data-list="down">
+                                <li><button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="selectFolder()">폴더 불러오기</button></li>
+                                <li><button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="selectJson()">JSON 불러오기</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="btn-group" data-dropbox-wrap="hdDrop3">
+                        <button type="button" class="btn btn-main" data-level="1" data-size="sm grow" onclick="sendSvgData()">폰트 생성</button>
+                        <button type="button" class="btn btn-sub" data-level="1" data-size="sm" data-dropbox-trigger="hdDrop3">+</button>
+                        <div class="dropbox-content p-12 ani" data-dropbox-target="hdDrop3">
+                            <ul data-list="down">
+                                <li><button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline">CSS Value Sheet 생성</button></li>
+                                <li><button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline">스프라이트 SVG 생성</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="side" class="header-side">
+                <div class="bd">
+                    <h4 class="tit-lg">프로젝트 정보</h4>
+                    <div class="g-row gap-08">
+                        <label class="col-12">
+                            <strong class="tit-sm">이름<small class="txt-xs">(Project Title)</small></strong>
+                            <input type="text" class="f-control" id="projectTitle" data-size="xs">
+                        </label>
+                        <label class="col-12">
+                            <strong class="tit-sm">설명<small class="txt-xs">(Description)</small></strong>
+                            <input type="text" class="f-control" id="projectDescription" data-size="xs">
+                        </label>
+                        <div class="col-12">
+                            <strong class="tit-sm">버전<small class="txt-xs">(Version)</small></strong>
+                            <div class="g-row gap-04">
+                                <label class="col"><input type="text" class="f-control" id="projectVersion" data-size="xs" value="1.0.0" readonly></label>
+                                <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="changeVersion(-1)">-</button></div>
+                                <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="changeVersion(1)">+</button></div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="divider" />
+                    <div class="g-row gap-08">
+                        <div class="col">
+                            <strong class="tit-sm">폰트 이름<small class="txt-xs">(Font-Family)</small></strong>
+                            <input type="text" class="f-control" id="fontName" data-size="xs">
+                        </div>
+                    </div>
+                </div>
+                <div class="ft">
+                    <div class="g-row gap-08">
+                        <div class="col">
+                            <button class="btn" data-size="grow" data-s="outline" data-level="2" onclick="selectFolder()">폴더 불러오기</button>
+                        </div>
+                        <div class="col">
+                            <button class="btn" data-size="grow" data-s="outline" data-level="2" onclick="selectJson()">JSON 불러오기</button>
+                        </div>
+                    </div>
+                    <hr class="divider" />
+                    <div class="btn-group" data-dropbox-wrap="btnDrop">
+                        <button type="button" class="btn btn-main" data-level="1" data-size="sm grow" onclick="sendSvgData()">폰트 생성</button>
+                        <button type="button" class="btn btn-sub" data-level="1" data-size="sm" data-dropbox-trigger="btnDrop">+</button>
+                        <div class="dropbox-content ani" data-dropbox-target="btnDrop">
+                            <ul data-list="down">
+                                <li><button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline">CSS Value Sheet 생성</button></li>
+                                <li><button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline">스프라이트 SVG 생성</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <main id="container">
+            <section id="intro">
+                <div class="la">
+                    <div class="title" data-section="6">
+                        <h2 class="tit-visual-md">Simply Icon Manager</h2>
+
+                    </div>
+                    <p class="lead" data-section="6">
+                        프로젝트에 사용할 SVG 폰트를 쉽게 생성하고 관리하세요.<br>
+                        아래 버튼을 클릭하여 시작하세요!
+                    </p>
+                </div>
+                <div class="ra grid gap-20">
+                    
+                </div>
+            </section>
+
+            <section id="iconArea">
+                <div class="flex utils" data-section="5">
+                    <div class="m-l-auto">
+                        <div class="g-row gap-08">
+                            <div class="col-auto">
+                                <button type="button" class="btn" data-level="1" data-size="xs" data-s="outline">선택 삭제</button>
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn" data-level="1" data-size="xs" data-s="outline">SVG 추가</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-area" id="iconCards" data-section="5">
+                    <!-- 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </section>
+        </main>
+
+        <!-- 편집 모달 -->
+        <div id="editModal" class="icon-modal" data-modal="editModal">
+            <div class="bg" data-modal-close="editModal"></div>
+            <div class="modal-con">
+                <div class="icon-editor">
+                    <div id="iconPreview" class="preview">
+                        <!-- svg -->
+                    </div>
+                    <div class="info">
+                        <h3 class="tit-head-sm" id="editIconName"><!-- 아이콘 이름 --></h3>
+                        <div class="g-row gap-20">
+                            <div class="item-form col-12">
+                                <strong class="tit-sm">Category</strong>
+                                <input type="text" class="f-control" data-size="xs" placeholder="카테고리를 입력하세요" />
+                            </div>
+                            <div class="item-copy col-6">
+                                <strong class="tit-sm">CSS</strong>
+                                <div class="code-box">
+                                    <code id="editIconCss"></code>
+                                    <button type="button" class="btn-copy"><span class="blind">COPY</span></button>
+                                </div>
+                            </div>
+                            <div class="item-copy col-6">
+                                <strong class="tit-sm">UNICODE</strong>
+                                <div class="code-box">
+                                    <code id="editIconCode"></code>
+                                    <button type="button" class="btn-copy"><span class="blind">COPY</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사용 가이드 -->
+        <div id="guideModal" class="modal" data-modal="guideModal">
+            <div class="modal-con">
+                <div class="con-head">
+                    <h2 class="tit">사용 가이드</h2>
+                    <button type="button" class="btn-close" data-modal-close="guideModal"><span class="blind">닫기</span></button>
+                </div>
+                <div class="con-body">
+                    <section id="guideContent">
+                        
+                    </section>
+                </div>
+            </div>
+        </div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="hidden">
+            <symbol id="mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6.5 6.5m-3.5 0a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0 -7 0" />
+                <path d="M2.5 21h8l-4 -7z" />
+                <path d="M14 3l7 7" />
+                <path d="M14 10l7 -7" />
+                <path d="M14 14h7v7h-7z" />
+            </symbol>
+        </svg>
+    </div>
+</body>
+
+</html>

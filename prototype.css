@@ -1,0 +1,20 @@
+[class*="ico-"] {display: inline-block; line-height: inherit; font-size: inherit; color: inherit; font-family: "prototype"; font-style: normal; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}
+[class*="ico-"]::before {content: "";}
+
+[class*="ico-"][data-size="lg"] {font-size: 1.3333em; line-height: .75em; vertical-align: -.0667em;}
+[class*="ico-"][data-size="xl"] {font-size: 1.5em; line-height: .6666em; vertical-align: -.075em;}
+[class*="ico-"][data-size="xxs"] {font-size: .5em;}
+[class*="ico-"][data-size="xs"] {font-size: .75em;}
+[class*="ico-"][data-size="sm"] {font-size: .875em;}
+[class*="ico-"][data-size="1x"] {font-size: 1em;}
+[class*="ico-"][data-size="2x"] {font-size: 2em;}
+[class*="ico-"][data-size="3x"] {font-size: 3em;}
+[class*="ico-"][data-size="4x"] {font-size: 4em;}
+[class*="ico-"][data-size="5x"] {font-size: 5em;}
+[class*="ico-"][data-size="6x"] {font-size: 6em;}
+[class*="ico-"][data-size="7x"] {font-size: 7em;}
+[class*="ico-"][data-size="8x"] {font-size: 8em;}
+[class*="ico-"][data-size="9x"] {font-size: 9em;}
+[class*="ico-"][data-size="10x"] {font-size: 10em;}
+
+
