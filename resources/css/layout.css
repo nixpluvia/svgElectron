@@ -97,15 +97,14 @@ body.open-mobile {overflow: hidden; height: 100%;}
 
 
 
-.icon-card {display: block; overflow: hidden; position: relative; border: 1px solid var(--color-gray-30); border-radius: 0.6rem;}
+.icon-card {display: block; overflow: hidden; position: relative; border: 1px solid var(--color-gray-30); border-radius: 0.6rem; background-color: #ffffff;}
 .icon-card .ck {display: flex; position: absolute; top: 1rem; left: 1rem; z-index: 2; align-items: center; gap: 0.8rem;}
 .icon-card .ck .err {width: 0.8rem; height: 0.8rem; border-radius: 999px; background-color: var(--color-red);}
 .icon-card .content {display: block; position: relative; padding: 2rem; aspect-ratio: 1 / 1;}
 .icon-card .content svg {display: block; margin: 0 auto; max-width: 100%; max-height: 100%;}
 .icon-card .content .btn-copy {position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: transparent;}
-.icon-card .info {display: flex; overflow: hidden; padding: 1rem; border-top: 1px solid var(--color-gray-30); align-items: center;}
-.icon-card .info .hd {display: block; overflow: hidden; flex-grow: 1;}
-.icon-card .info .hd > strong {display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.icon-card .btn-title {display: block; overflow: hidden; width: 100%; background-color: transparent; padding: 1rem; border-top: 1px solid var(--color-gray-30); align-items: center;}
+.icon-card .btn-title > strong {display: block; overflow: hidden; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 .icon-card .btn-del {position: absolute; top: 1rem; right: 1rem; z-index: 2; width: 2rem; height: 2rem; background: red no-repeat center center;}
 
 
@@ -117,19 +116,19 @@ body.open-mobile {overflow: hidden; height: 100%;}
 -------------------------------------------------------------------*/
 .icon-modal {display: flex; overflow-x: auto; overflow-y: hidden; top: 0; left: 0; z-index: 999; width: 100%; height: 100%; padding: var(--r-20);}
 .icon-modal .bg {content:""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0);}
-.icon-modal .modal-con {display: block; overflow-x: hidden; overflow-y: auto; position: relative; max-width: 96rem; width: 100%; max-height: 100%; margin: auto; padding: 2rem; border-radius: var(--radius-12); background-color: #ffffff; color: var(--modal-txt); flex-direction: column;}
+.icon-modal .modal-con {display: block; overflow-x: hidden; overflow-y: auto; position: relative; max-width: 60rem; width: 100%; max-height: 100%; margin: auto; padding: 2rem; border-radius: var(--radius-12); background-color: #ffffff; color: var(--modal-txt); flex-direction: column;}
 .icon-modal .modal-con .btn-close {position: absolute; top: var(--r-08); right: var(--r-20);}
 
 .icon-editor {display: flex;}
-.icon-editor .preview {display: block; width: 8rem; margin-bottom: auto; border: 1px solid var(--color-gray-30); flex-shrink: 0; aspect-ratio: 1 / 1;}
+.icon-editor .preview {display: block; width: 10rem; margin-bottom: auto; border: 1px solid var(--color-gray-30); flex-shrink: 0; aspect-ratio: 1 / 1;}
 .icon-editor .preview svg {display: block; margin: auto; max-width: 100%; max-height: 100%;}
 
-.icon-editor .info {display: block; overflow: hidden; flex-grow: 1; padding: 0 var(--r-20);}
+.icon-editor .info {display: block; overflow: hidden; flex-grow: 1; padding-left: var(--r-20);}
 .icon-editor .info [class*="item"] {display: block;}
 .icon-editor .info [class*="item"] > strong {margin-bottom: 0.8rem;}
 
 .icon-editor .info .code-box {display: flex; border: 1px solid var(--color-gray-30); border-radius: 0.4rem 0 0 0.4rem;}
-.icon-editor .info .code-box code {display: block; overflow: hidden; height: 3.2rem; flex-grow: 1;}
+.icon-editor .info .code-box code {display: block; overflow: hidden; height: 3.2rem; padding: 0 1rem; flex-grow: 1;}
 .icon-editor .info .code-box .btn-copy {display: block; width: 3.2rem; height: 3.2rem; background-color: black; flex-shrink: 0;}
 
 /*-------------------------------------------------------------------
@@ -145,7 +144,7 @@ body.open-mobile {overflow: hidden; height: 100%;}
 
 /*-------------------------------------------------------------------
 	분류이름: Guide Content Markdown HTML
-	분류그룹: DOCS
+	분류그룹: 모달
 -------------------------------------------------------------------*/
 #guideContent {color: var(--color-gray-70);}
 #guideContent h1,
@@ -176,3 +175,15 @@ body.open-mobile {overflow: hidden; height: 100%;}
 #guideContent th, #guideContent td {border: 1px solid #e0e0e0; padding: 0.8rem 1.2rem; text-align: left;}
 #guideContent th {background: #f6f8fa; font-weight: 600;}
 #guideContent img {max-width: 100%; height: auto; display: block; margin: 1.2rem 0;}
+
+
+/*-------------------------------------------------------------------
+	분류이름: SVG 추가 모달
+	분류그룹: 모달
+-------------------------------------------------------------------*/
+#svgAddContent {display: grid; gap: 2rem;}
+#svgAddContent .btn-submit {height: 100%;}
+#svgAddContent .form-area {display: grid; gap: 1rem; grid-template-rows: auto 1fr; grid-template-columns: 3fr 1fr;}
+#svgAddContent .form-area >:first-child {grid-column: span 2;}
+#svgAddContent .btn-area {display: grid; gap: 1rem; grid-template-rows: auto 1fr; grid-template-columns: repeat(2, 1fr);}
+#svgAddContent .btn-area >:first-child {grid-column: span 2;}

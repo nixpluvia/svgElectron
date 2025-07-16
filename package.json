@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "marked": "^16.0.0",
+    "svg-sprite": "^2.0.4",
     "svg2ttf": "^6.0.3",
     "svgicons2svgfont": "^15.0.1"
   }

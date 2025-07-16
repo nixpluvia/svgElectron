@@ -89,6 +89,35 @@ module.exports = function(){
         }
     });
 
+    // SVG 파일 선택 요청 수신
+    ipcMain.handle('select-svg', async () => {
+        const result = await dialog.showOpenDialog({
+            title: 'SVG 파일 선택',
+            filters: [
+                { name: 'SVG Files', extensions: ['svg'] }
+            ],
+            properties: ['openFile']
+        });
+        if (result.canceled || !result.filePaths || result.filePaths.length === 0) {
+            return null;
+        }
+
+        const svgFilePath = result.filePaths[0];
+        try {
+            const svgData = await fsp.readFile(svgFilePath, 'utf8');
+            const fileInfo = {
+                name: path.basename(svgFilePath, '.svg'),
+                data: svgData.trim(),
+                sizes: "32x32", // 기본값, 필요시 수정 가능
+                category: [],
+                updated: new Date().toISOString().replace('T', ' ').substring(0, 19)
+            }
+            return { path: svgFilePath, data: fileInfo };
+        } catch (err) {
+            return { path : svgFilePath, data: [], error: err.message };
+        }
+    });
+
 
     // Markdown 파일 로드 요청 수신
     ipcMain.handle('load-md', async (_, filePath) => {

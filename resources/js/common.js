@@ -4,12 +4,18 @@ const dropbox = ueye.dropbox({
     animation : true,
 });
 
+const _private = {
+    isShiftPressed: false,
+    prevChecked : null,
+    optimizedIcons: [],
+}
 const _repository = {
     title: 'svg-electron',
     version: '1.0.0',
     description: 'SVG Font Generator using Electron',
     fontName: 'MyCustomFont',
-    icons : null,
+    fontPrefix : '',
+    icons : [],
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -22,7 +28,61 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.setAttribute('data-fold-info', 'Y');
         }
     });
-})
+
+    let iconCards = document.getElementById('iconCards');
+    new Sortable(iconCards, {
+        animation: 150,
+        onEnd : function (evt) {
+            // 아이콘 순서 변경 시 _repository에 반영
+            const iconName = evt.item.children[0].getAttribute('data-icon-name');
+            const iconIndex = _repository.icons.findIndex(icon => icon.name === iconName);
+            if (iconIndex !== -1) {
+                // 아이콘의 순서를 변경
+                const movedIcon = _repository.icons.splice(iconIndex, 1)[0];
+                _repository.icons.splice(evt.newIndex, 0, movedIcon);
+            }
+        }
+    });
+
+    document.addEventListener('change', function(event) {
+        if (event.target.name !== 'iconSelect') return;
+        let target = event.target;
+        if (_private.isShiftPressed) {
+            let startIdx = -1, endIdx = -1;
+            for (let idx = 0; idx < _repository.icons.length; idx++) {
+                const d = _repository.icons[idx];
+                if (d.name == _private.prevChecked) {
+                    startIdx = idx;
+                    if (endIdx > -1) break;
+                }
+                if (d.name == target.value) {
+                    endIdx = idx;
+                    if (startIdx > -1) break;
+                }
+            }
+            if (startIdx > -1 && endIdx > -1) {
+                // 순서 보정 (앞뒤 상관없이)
+                const [from, to] = startIdx < endIdx ? [startIdx, endIdx] : [endIdx, startIdx];
+                for (let i = from; i <= to; i++) {
+                    const d = _repository.icons[i];
+                    document.querySelector(`.icon-card[data-icon-name="${d.name}"] input[name="iconSelect"]`).checked = target.checked;
+                }
+            }
+        }
+        _private.prevChecked = target.value;
+    });
+    // Shift 키 이벤트
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Shift') {
+            _private.isShiftPressed = true;
+        }
+    });
+    document.addEventListener('keyup', (e) => {
+        if (e.key === 'Shift') {
+            _private.isShiftPressed = false;
+        }
+    });
+});
 
 // 사용 가이드
 let isRenderedGuide = false;
@@ -48,7 +108,6 @@ function showEditModal(iconName) {
     const iconCodeTxt = document.getElementById('editIconCode');
 
     // 데이터 채우기
-    console.log(icon)
     preview.innerHTML = icon.data;
     iconNameTxt.innerHTML = icon.name;
     iconCodeTxt.innerHTML = icon.code;
@@ -66,6 +125,12 @@ function copyCode(iconName) {
     }
 }
 
+// 아이콘 전체 선택/해제 메서드
+function selectAllIcons() {
+    const checkboxes = document.querySelectorAll('input[name="iconSelect"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !allChecked);
+}
 // 아이콘 삭제 메서드
 function deleteIcon(el, iconName) {
     const icon = _repository.icons.find(icon => icon.name === iconName);
@@ -79,6 +144,32 @@ function deleteIcon(el, iconName) {
             type : 'mini'
         });
     }
+}
+// 아이콘 선택 삭제 메서드
+function deleteSelectedIcons() {
+    const selectedIcons = document.querySelectorAll('input[name="iconSelect"]:checked');
+    if (selectedIcons.length === 0) {
+        ueye.toast.action({
+            status: 'warning',
+            message: '삭제할 아이콘을 선택해주세요.',
+            type : 'mini'
+        });
+        return;
+    }
+    // 선택된 아이콘 삭제
+    const iconNamesToDelete = Array.from(selectedIcons).map(cb => cb.value);
+    _repository.icons = _repository.icons.filter(icon => !iconNamesToDelete.includes(icon.name));
+    iconNamesToDelete.forEach(iconName => {
+        const iconCard = document.querySelector(`.icon-card[data-icon-name="${iconName}"]`);
+        if (iconCard) {
+            iconCard.remove();
+        }
+    });
+    ueye.toast.action({
+        status: 'success',
+        message: `선택된 아이콘이 삭제되었습니다.`,
+        type : 'mini'
+    });
 }
 
 
@@ -121,256 +212,3 @@ function changeVersion(delta) {
 
     input.value = formatVersion([major, minor, patch]);
 }
-
-/*-------------------------------------------------------------------
-    @Electron API
-    @description Electron API를 통해 폴더 선택 및 아이콘 데이터 가져오기
--------------------------------------------------------------------*/
-async function selectFolder() {
-    const folderData = await window.electronAPI.selectFolder();
-    if (folderData === null || folderData === undefined) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '취소되었습니다.',
-            type : 'mini'
-        });
-        return;
-    };
-    const iconCards = document.getElementById('iconCards');
-
-    // 아이콘 카드 렌더링
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(folderData.data));
-
-    // _repository에 데이터 채우기
-    _repository.path = folderData.path;
-    _repository.icons = folderData.data;
-
-    // svg 최적화
-    optimizeSVG();
-}
-
-async function selectJson() {
-    const folderData = await window.electronAPI.selectJson();
-    if (folderData === null || folderData === undefined) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '취소되었습니다.',
-            type : 'mini'
-        });
-        return;
-    };
-    const svgInfo = folderData.data;
-
-    // 아이콘 카드 렌더링
-    const iconCards = document.getElementById('iconCards');
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(svgInfo.icons));
-
-    // _repository에 데이터 채우기
-    _repository.path = folderData.path;
-    _repository.title = svgInfo.title || 'svg-electron';
-    _repository.version = svgInfo.version || '1.0.0';
-    _repository.description = svgInfo.description || 'SVG Font Generator using Electron';
-    _repository.fontName = svgInfo.fontName || 'MyCustomFont';
-    _repository.icons = svgInfo.icons || null;
-
-    // 폼 필드에 데이터 채우기
-    document.getElementById('projectTitle').value = svgInfo.title || 'SVG Project';
-    document.getElementById('projectDescription').value = svgInfo.description || 'A project using SVG icons';
-    document.getElementById('projectVersion').value = svgInfo.version || '1.0.0';
-    document.getElementById('fontName').value = svgInfo.fontName || 'MyCustomFont';
-}
-
-/**
- * 아이콘 카드 렌더링 함수
- * @param {Array} data 
- * @returns 
- */
-function renderCard(data) {
-    const fragment = document.createDocumentFragment();
-    data.forEach(icon => {
-        const col = document.createElement('div');
-        col.className = 'item';
-        col.innerHTML = `
-            <div class="icon-card" data-icon-name="${icon.name}">
-                <div class="ck">
-                    <label class="f-check only">
-                        <input type="checkbox" name="iconSelect" value="${icon.name}" checked aria-label="...">
-                        <span></span>
-                    </label>
-                </div>
-                <div class="content">
-                    ${icon.data}
-                    <button type="button" class="btn-copy" onclick="copyCode('${icon.name}')"><span class="blind">COPY</span></button>
-                </div>
-                <div class="info">
-                    <div class="hd"><strong class="tit-sm">${icon.name || '이름없음'}</strong></div>
-                    <button type="button" class="btn" data-level="2" data-size="xs" onclick="showEditModal('${icon.name}')">+</button>
-                </div>
-                <button type="button" class="btn-del" onclick="deleteIcon(this, '${icon.name}')"><span class="blind">삭제</span></button>
-            </div>
-        `
-        fragment.appendChild(col);
-    });
-    return fragment;
-}
-
-/**
- * SVG 최적화 함수
- */
-function optimizeSVG() {
-    document.querySelectorAll('#iconArea svg').forEach(svg => {
-        const optimizedSVG = optimize(svg);
-        const iconName = svg.closest('.icon-card').getAttribute('data-icon-name');
-        _repository.icons.find(icon => icon.name === iconName).data = optimizedSVG;
-    });
-}
-function optimize(svg){
-    const draw = SVG(svg);
-    let includeStroke = false;
-    let msg = '';
-    // svg 크기 속성 제거
-    draw.attr('width', null);
-    draw.attr('height', null);
-    // 불필요한 요소(defs, style, g 등) 제거
-    draw.find('defs, style').forEach(el => {
-        el.remove();
-    });
-    // g 요소 내부의 자식들을 svg 바로 아래로 이동시키고 g는 제거
-    draw.find('g').forEach(g => {
-        // g의 자식 노드들을 svg 바로 아래로 이동
-        while (g.node.firstChild) {
-            draw.node.appendChild(g.node.firstChild);
-        }
-        g.remove();
-    });
-
-    // 각 도형 요소에 대해 처리
-    // fill, stroke 속성을 제거하고, path로 변환
-    draw.each(function () {
-        // DOM 노드에서 계산된 스타일 가져오기
-        const computed = window.getComputedStyle(this.node);
-        const fillValue = computed.fill;
-        const strokeValue = computed.stroke;
-        let isStrokeOnly = false;
-
-        // fill 값이 none 이고, stroke가 존재하면 stroke 기반으로 간주
-        if ((fillValue === 'none' || !fillValue) && strokeValue !== 'none') {
-            isStrokeOnly = true;
-            includeStroke = true;
-        }
-
-        // ✅ 경고
-        if (isStrokeOnly) {
-            // this.stroke({ color: 'currentColor'});
-            msg = `⚠️ ${this.type} 요소는 stroke 기반이며, fill로 변환할 수 없습니다.`;
-        } else {
-            let target = this;
-            // path 변환 작업
-            if (this.type !== 'path') {
-                try {
-                    const pathData = this.toPath();
-                    if (pathData) {
-                        target = pathData;
-                        this.remove();
-                    }
-                } catch (e) {
-                    // 변환 실패 시 무시
-                }
-            }
-
-            // 스타일 속성 제거
-            target.attr('style', null);
-            // fill, stroke 속성 제거
-            target.attr('fill', null);
-            target.attr('stroke', null);
-            target.attr('stroke-width', null);
-            target.attr('stroke-linecap', null);
-            target.attr('stroke-linejoin', null);
-            target.attr('stroke-dasharray', null);
-            target.attr('stroke-dashoffset', null);
-            target.attr('fill-opacity', null);
-            target.attr('opacity', null);
-        }
-    });
-    draw.attr('fill', 'currentColor');
-    if (includeStroke) {
-        const error = document.createElement('span');
-        error.className = 'err'
-        // error.textContent = msg;
-        svg.closest('.icon-card').querySelector('.ck').appendChild(error);
-    }
-    // SVG 태그 문자열 추출 및 콘솔 출력
-    let svgTag = svg.outerHTML;
-    svgTag = svgTag.replace(/<!--[\s\S]*?-->/g, '');
-    svgTag = svgTag.replace(/>\s+</g, '><');
-
-    return svgTag;
-}
-
-
-/**
- * 선택된 SVG 데이터를 전송하는 함수
- * @param {*} svgContent 
- * @param {*} iconName 
- */
-function sendSvgData(svgContent, iconName) {
-    const projectTitle = document.getElementById('projectTitle').value || 'SVG Project';
-    const projectDescription = document.getElementById('projectDescription').value || 'A project using SVG icons';
-    const projectVersion = document.getElementById('projectVersion').value || '1.0.0';
-    const fontName = document.getElementById('fontName').value || 'MyCustomFont';
-    const icons = [];
-
-    document.querySelectorAll('input[name="iconSelect"]:checked').forEach(checkbox => {
-        const iconName = checkbox.value;
-        const iconData = _repository.icons.find(icon => icon.name === iconName);
-        if (iconData) {
-            icons.push(iconData);
-        }
-    });
-    if (icons.length === 0) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '선택된 아이콘이 없습니다.',
-            type : 'mini'
-        });
-        console.warn('No icons selected for font generation.');
-        return false;
-    }
-
-    ueye.loading.show();
-    const data = {
-        projectInfo : {
-            title : projectTitle,
-            description : projectDescription,
-            version : projectVersion,
-            fontName : fontName,
-        },
-        icons : icons
-    }
-    window.electronAPI.generateFont(data);
-}
-
-
-
-
-/**
- * SVG 폰트 생성을 완료했을 때 호출되는 함수
- */
-window.electronAPI.onGenerateFontDone((event, arg) => {
-    if (typeof arg === 'string') {
-        ueye.loading.hide();
-        ueye.toast.action({
-            status: 'warning',
-            message: arg,
-            type : 'mini'
-        });
-        return;
-    }
-    const iconCards = document.getElementById('iconCards');
-    const svgInfo = arg.data;
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(svgInfo.icons));
-    ueye.loading.hide();
-});

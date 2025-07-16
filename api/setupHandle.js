@@ -1,7 +1,7 @@
-const fontHandle = require('./fontHandle');
+const generateHandle = require('./generateHandle');
 const fileHandle = require('./fileHandle');
 
 module.exports = function () {
-  fontHandle();
+  generateHandle();
   fileHandle();
 };

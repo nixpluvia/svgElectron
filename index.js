@@ -1,17 +1,24 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, screen } = require('electron');
 const path = require('path');
 const setupHandle = require('./api/setupHandle');
 
 function createWindow() {
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width, height } = primaryDisplay.workAreaSize;
+
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width,
+    height,
     webPreferences: {
       preload: path.join(__dirname, '/api/preload.js'),
-      contextIsolation: true, // contextIsolation을 true로 설정하여 보안 강화
-      nodeIntegration: false,  // preload만 사용 시 권장
-    }
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+    frame: true, // 창의 프레임(타이틀바 등) 표시
+    fullscreen: false, // 풀스크린 모드 해제
   });
+  win.setBounds({ x: 0, y: 0, width, height }); // 화면 전체 크기에 맞춤
+  win.center(); // 화면 중앙에 위치
 
   // index.html 로드
   win.loadFile('index.html');
