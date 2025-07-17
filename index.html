@@ -42,9 +42,11 @@
             </h1>
 
             <div class="utils">
-                <div class="d-flex gap-3 col-auto ms-auto">
-                    <button type="button" class="btn" data-level="2" data-size="sm" onclick="showGuideModal()"><i class="i-c-help m-r-08"></i>사용 가이드</button>
+                <div class="f-search">
+                    <input type="text" class="f-control" id="searchIconInput" placeholder="아이콘 검색" data-size="sm">
+                    <button type="button" class="btn" id="btnSearchIcon" data-level="1" data-size="sm"><i class="i-search"></i></button>
                 </div>
+                <button type="button" class="btn" data-level="2" data-size="sm" onclick="showGuideModal()"><i class="i-c-help m-r-08"></i>사용 가이드</button>
             </div>
         </div>
         
@@ -64,17 +66,13 @@
                         <strong class="tit-sm">버전<small class="txt-xs">(Version)</small></strong>
                         <div class="g-row gap-04">
                             <label class="col"><input type="text" class="f-control" id="projectVersion" data-size="xs" value="1.0.0" readonly></label>
-                            <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="changeVersion(-1)"><i class="i-minus"></i></button></div>
-                            <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="changeVersion(1)"><i class="i-plus"></i></button></div>
+                            <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="form_main.changeVersion(-1)"><i class="i-minus"></i></button></div>
+                            <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="form_main.changeVersion(1)"><i class="i-plus"></i></button></div>
                         </div>
                     </div>
                 </div>
                 <hr class="divider" />
                 <div class="g-row gap-08">
-                    <div class="col-12">
-                        <strong class="tit-sm">폰트 이름<small class="txt-xs">(Font-Family)</small></strong>
-                        <input type="text" class="f-control" id="fontName" data-size="xs">
-                    </div>
                     <div class="col-12">
                         <strong class="tit-sm">접두사<small class="txt-xs">(Prefix)</small></strong>
                         <input type="text" class="f-control" id="fontPrefix" data-size="xs">
@@ -154,10 +152,10 @@
             <div class="flex utils" data-section="5">
                 <div class="g-row gap-08">
                     <label class="col-auto">
-                        <button type="button" class="btn" data-level="1" data-size="xs" data-s="outline" onclick="selectAllIcons()">전체 선택 <i class="i-check m-l-08"></i></button>
+                        <button type="button" class="btn" data-level="1" data-size="xs" data-s="outline" onclick="card_main.selectAllIcons()">전체 선택 <i class="i-check m-l-08"></i></button>
                     </label>
                     <div class="col-auto">
-                        <button type="button" class="btn" data-level="1" data-size="xs" data-s="outline" onclick="deleteSelectedIcons()">선택 삭제 <i class="i-delete m-l-08"></i></button>
+                        <button type="button" class="btn" data-level="1" data-size="xs" data-s="outline" onclick="card_main.deleteSelectedIcons()">선택 삭제 <i class="i-delete m-l-08"></i></button>
                     </div>
                 </div>
                 <div class="m-l-auto">

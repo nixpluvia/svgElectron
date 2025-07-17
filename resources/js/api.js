@@ -147,14 +147,12 @@ async function selectJson() {
     _repository.title = svgInfo.title || 'svg-electron';
     _repository.version = svgInfo.version || '1.0.0';
     _repository.description = svgInfo.description || 'SVG Font Generator using Electron';
-    _repository.fontName = svgInfo.fontName || 'MyCustomFont';
     _repository.icons = svgInfo.icons || null;
 
     // 폼 필드에 데이터 채우기
     document.getElementById('projectTitle').value = svgInfo.title || 'SVG Project';
     document.getElementById('projectDescription').value = svgInfo.description || 'A project using SVG icons';
     document.getElementById('projectVersion').value = svgInfo.version || '1.0.0';
-    document.getElementById('fontName').value = svgInfo.fontName || 'MyCustomFont';
     document.getElementById('fontPrefix').value = svgInfo.fontPrefix || '';
 
     // colorSet이 있다면 색상 폼에 추가
@@ -167,7 +165,7 @@ async function selectJson() {
                 <div class="f-color">
                     <span style="background-color: ${colorHex};"></span>
                     <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" value="${d.suffix || ''}" placeholder="접미사(suffix)">
-                    <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="deleteColor(this)"><i class="i-close"></i></button>
+                    <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="layout_main.deleteColor(this)"><i class="i-close"></i></button>
                 </div>
             `;
             colorForms.insertAdjacentHTML('beforeend', html);
@@ -202,10 +200,10 @@ function renderCard(data) {
                 </div>
                 <div class="content">
                     ${icon.data}
-                    <button type="button" class="btn-copy" onclick="showEditModal('${icon.name}')"><span class="blind">COPY</span></button>
+                    <button type="button" class="btn-copy" onclick="edit_main.showEditModal('${icon.name}')"><span class="blind">COPY</span></button>
                 </div>
-                <button type="button" class="btn-title" onclick="showEditModal('${icon.name}')"><strong class="tit-sm">${icon.name || '이름없음'}</strong></button>
-                <button type="button" class="btn-del" onclick="deleteIcon(this, '${icon.name}')"><i class="i-delete"></i><span class="blind">삭제</span></button>
+                <button type="button" class="btn-title" onclick="copyCode('data', '${icon.name}')"><strong class="tit-xs">${icon.name || '이름없음'}</strong></button>
+                <button type="button" class="btn-del" onclick="card_main.deleteIcon(this, '${icon.name}')"><i class="i-delete"></i><span class="blind">삭제</span></button>
             </div>
         `
         fragment.appendChild(col);
@@ -334,7 +332,6 @@ function sendSvgData() {
     const projectTitle = document.getElementById('projectTitle').value || 'SVG Project';
     const projectDescription = document.getElementById('projectDescription').value || 'A project using SVG icons';
     const projectVersion = document.getElementById('projectVersion').value || '1.0.0';
-    const fontName = document.getElementById('fontName').value || 'MyCustomFont';
     const fontPrefix = document.getElementById('fontPrefix').value || '';
     document.querySelectorAll('input[name="colorSet"]').forEach(el => {
         const suffix = el.value.trim();
@@ -350,7 +347,6 @@ function sendSvgData() {
             title : projectTitle,
             description : projectDescription,
             version : projectVersion,
-            fontName : fontName,
             fontPrefix : fontPrefix,
             colorSet : _repository.colorSet || []
         },

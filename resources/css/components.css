@@ -853,7 +853,6 @@ select.f-control:focus {border-color: var(--color-primary); outline: 1px solid r
 	@media
 -------------------------------------------------------------------*/
 @media screen and (max-width: 768px) {
-    .modal .modal-con {padding: var(--r-16);}
 	.modal .modal-con .con-head {margin-bottom: var(--r-16);}
 	.modal .modal-con .con-foot {margin-top: var(--r-16);}
 }

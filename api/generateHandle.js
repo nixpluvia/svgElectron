@@ -29,20 +29,20 @@ module.exports = function () {
 			...data.projectInfo,
 			icons : data.icons,
 		}
-		const fontFamilyName = svgInfo.fontName || "MyCustomFont";
-		fs.writeFileSync(path.join(folderPath, fontFamilyName + ".json"), JSON.stringify(svgInfo, null, 2), "utf8");
+		const projectTitle = svgInfo.title || "sim";
+		fs.writeFileSync(path.join(folderPath, projectTitle + ".json"), JSON.stringify(svgInfo, null, 2), "utf8");
 
 		return new Promise((resolve, reject) => {
 			const fontStream = new SVGIcons2SVGFontStream({
-				fontName: fontFamilyName,
+				fontName: projectTitle,
 				normalize: true,
 				fontHeight: 1000, // 전체 높이 기준
 				descent: 0,
 				centerHorizontally: true,
 			});
 
-			const svgFontPath = path.join(folderPath, fontFamilyName + ".svg");
-			const ttfFontPath = path.join(folderPath, fontFamilyName + ".ttf");
+			const svgFontPath = path.join(folderPath, projectTitle + ".svg");
+			const ttfFontPath = path.join(folderPath, projectTitle + ".ttf");
 
 			// SVG Font 파일 스트림
 			const svgFontWrite = fs.createWriteStream(svgFontPath);
@@ -91,7 +91,7 @@ module.exports = function () {
 			return null;
 		}
 
-		const fontFamilyName = data.projectInfo.fontName || "MyCustomFont";
+		const projectTitle = data.projectInfo.title || "sim";
 		const fontPrefix = data.projectInfo.fontPrefix || '';
 		let idx = 0;
 		// 폴더 경로 선택됨
@@ -127,12 +127,12 @@ module.exports = function () {
 			}
 		}
 		const cssPath = path.join(__dirname, '../prototype.css');
-		const copyPath = path.join(folderPath, fontFamilyName + ".css");
+		const copyPath = path.join(folderPath, projectTitle + ".css");
 		let cssData = fs.readFileSync(cssPath, "utf8");
 		if (fontPrefix !== '') {
 			cssData = cssData.replace(/i-/g, prefix);
 		}
-		cssData = cssData.replace(/prototype/g, fontFamilyName);
+		cssData = cssData.replace(/prototype/g, projectTitle);
 		fs.writeFileSync(copyPath, cssData + '\n' + newCss, "utf8");
 
 		return folderPath || null; // 폴더 경로 반환
@@ -181,7 +181,7 @@ module.exports = function () {
 		}
 
 		const fontPrefix = data.projectInfo.fontPrefix || '';
-		const fontFamilyName = data.projectInfo.fontName || "MyCustomFont";
+		const projectTitle = data.projectInfo.title || "sim";
 		let newCss = ":root {\n";
 		const prefix = fontPrefix !== '' ? `--i-${fontPrefix}-` : '--i-';
 		for (const icon of iconsData) {
@@ -207,7 +207,7 @@ module.exports = function () {
 		}
 		newCss += "}\n";
 		// CSS 파일 생성
-		const copyPath = path.join(folderPath, fontFamilyName +"Variables.css");
+		const copyPath = path.join(folderPath, projectTitle +"Variables.css");
 		fs.writeFileSync(copyPath, newCss, "utf8");
 
 		return folderPath || null; // 폴더 경로 반환
