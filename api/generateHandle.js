@@ -4,6 +4,7 @@ const { SVGIcons2SVGFontStream } = require("svgicons2svgfont");
 const { optimize } = require("svgo");
 const svg2ttf = require("svg2ttf");
 const fs = require("fs");
+const Sprite = require("svg-sprite");
 
 module.exports = function () {
 	async function selectFolder() {
@@ -12,13 +13,6 @@ module.exports = function () {
 			properties: ["openDirectory"],
 		});
 
-		const iconsData = data.icons;
-		const fontFamilyName = data.projectInfo.fontName || "MyCustomFont";
-		const fontPrefix = data.projectInfo.fontPrefix || '';
-		if (!Array.isArray(iconsData) || iconsData.length === 0) {
-			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
-			return null;
-		}
 		if (dialogResult.canceled || !dialogResult.filePaths || dialogResult.filePaths.length === 0) return null;
 
 		return dialogResult.filePaths[0]; // 폴더 경로 반환
@@ -87,10 +81,18 @@ module.exports = function () {
 	 * @param {*} data
 	 * @returns
 	 */
-	async function optimizeIcons(data) {
-		const folderPath = await selectFolder();
+	async function optimizeIcons(data, paramPath) {
+		const folderPath = paramPath || await selectFolder();
 		if (!folderPath) return null;
 
+		const iconsData = data.icons;
+		if (!Array.isArray(iconsData) || iconsData.length === 0) {
+			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
+			return null;
+		}
+
+		const fontFamilyName = data.projectInfo.fontName || "MyCustomFont";
+		const fontPrefix = data.projectInfo.fontPrefix || '';
 		let idx = 0;
 		// 폴더 경로 선택됨
 		const outputDir = path.join(folderPath, "optimized");
@@ -149,7 +151,7 @@ module.exports = function () {
 				return;
 			}
 			const svgInfo = await generateFont({data, folderPath}); // 최적화된 데이터 사용
-			console.log("SVG 아이콘 최적화 및 폰트 생성 완료:", folderPath, svgInfo);
+			console.log("SVG 아이콘 최적화 및 폰트 생성 완료");
 			event.reply("generate-font-done", {
 				path: folderPath, // 폴더 경로
 				data: svgInfo, // SVG 아이콘 정보가 담긴 객체
@@ -168,15 +170,18 @@ module.exports = function () {
 	 * @param {*} data
 	 * @returns
 	 */
-	async function generateVariable(data) {
-		const folderPath = await selectFolder();
+	async function generateVariable(data, paramPath) {
+		const folderPath = paramPath || await selectFolder();
 		if (!folderPath) return null;
 
-		// 폴더 경로 선택됨
-		if (!fs.existsSync(folderPath)) {
-			fs.mkdirSync(folderPath, { recursive: true });
+		const iconsData = data.icons;
+		if (!Array.isArray(iconsData) || iconsData.length === 0) {
+			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
+			return null;
 		}
 
+		const fontPrefix = data.projectInfo.fontPrefix || '';
+		const fontFamilyName = data.projectInfo.fontName || "MyCustomFont";
 		let newCss = ":root {\n";
 		const prefix = fontPrefix !== '' ? `--i-${fontPrefix}-` : '--i-';
 		for (const icon of iconsData) {
@@ -202,7 +207,7 @@ module.exports = function () {
 		}
 		newCss += "}\n";
 		// CSS 파일 생성
-		const copyPath = path.join(folderPath, "icons.css");
+		const copyPath = path.join(folderPath, fontFamilyName +"Variables.css");
 		fs.writeFileSync(copyPath, newCss, "utf8");
 
 		return folderPath || null; // 폴더 경로 반환
@@ -227,6 +232,144 @@ module.exports = function () {
 		} catch (err) {
 			console.error("폰트 생성 실패:", err);
 			event.reply("generate-variable-done", "실패!");
+		}
+	});
+
+
+	
+	const spriteConfig = {
+		mode: {
+			css: {
+				dest: 'sprite',      // 결과 파일 저장 폴더
+				sprite: 'sprite.svg', // 스프라이트 SVG 파일명
+				bust: false,       // 캐시방지용 query string 제거
+				render: {
+					css: true,
+				}
+			},
+			stack: {
+				dest: 'sprite',      // 결과 파일 저장 폴더
+				sprite: 'stack.svg', // 스프라이트 SVG 파일명
+				bust: false,       // 캐시방지용 query string 제거
+				render: {
+					css: false,
+				}
+			},
+		}
+	}
+	/**
+	 * CSS Value Sheet 생성
+	 * @param {*} data
+	 * @returns
+	 */
+	async function generateSprite(data, paramPath) {
+		const folderPath = paramPath || await selectFolder(); // svg 아이콘 목록 경로
+		if (!folderPath) return null;
+		
+		const iconsData = data.icons;
+		if (!Array.isArray(iconsData) || iconsData.length === 0) {
+			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
+			return null;
+		}
+
+		const newFolderPath = path.join(folderPath, "sprite");
+		if (!fs.existsSync(newFolderPath)) {
+			fs.mkdirSync(newFolderPath, { recursive: true });
+		}
+		spriteConfig.mode.css.dest = newFolderPath; // 결과 파일 저장 폴더
+		spriteConfig.mode.stack.dest = newFolderPath; // 결과 파일 저장 폴더
+		const sprite = new Sprite(spriteConfig);
+		const fakePath = '/virtual/path/';
+		for (const icon of iconsData) {
+			if (icon.data && icon.data.trim() !== "") {
+				try {
+					sprite.add(fakePath + icon.name + ".svg", icon.name + ".svg", icon.data);
+
+				} catch (err) {
+					console.error(`Error optimizing icon ${icon.name}:`, err);
+				}
+			}
+		}
+		sprite.compile((error, result) => {
+			if (error) {
+				console.error("Sprite compilation error:", error);
+				return "compile error";
+			}
+
+			for (const mode in result) {
+				for (const resource in result[mode]) {
+					fs.writeFileSync(result[mode][resource].path, result[mode][resource].contents);
+				}
+			}
+		});
+
+		return folderPath || null; // 폴더 경로 반환
+	}
+
+	/**
+	 * SVG 폰트 생성 요청 수신
+	 * @param {*} event
+	 * @param {*} svgInfo
+	 */
+	ipcMain.on("generate-sprite", async (event, data) => {
+		try {
+			const folderPath = await generateSprite(data);
+			if (!folderPath) {
+				event.reply("generate-sprite-done", "폴더 선택이 취소되었습니다.");
+				return;
+			} else if (folderPath === "compile error") {
+				event.reply("generate-sprite-done", "스프라이트 컴파일 오류가 발생했습니다.");
+				return;
+			}
+			console.log("SVG Sprite 생성 완료");
+			event.reply("generate-sprite-done", {
+				path: folderPath, // 폴더 경로
+				data: "success", // SVG 아이콘 정보가 담긴 객체
+			});
+		} catch (err) {
+			console.error("폰트 생성 실패:", err);
+			event.reply("generate-sprite-done", "실패!");
+		}
+	});
+
+
+	/**
+	 * SVG 폰트 생성 요청 수신
+	 * @param {*} event
+	 * @param {*} svgInfo
+	 */
+	ipcMain.on("generate-all", async (event, data) => {
+		try {
+			const folderPath = await selectFolder(); // svg 아이콘 목록 경로
+			if (!folderPath) {
+				event.reply("generate-all-done", "폴더 선택이 취소되었습니다.");
+				return;
+			};
+
+			// 폰트 생성
+			const generatedIcons = await optimizeIcons(data, folderPath);
+			const svgInfo = await generateFont({data, folderPath}); // 최적화된 데이터 사용
+			console.log("SVG 아이콘 최적화 및 폰트 생성 완료");
+
+			// CSS Value Sheet 생성
+			const generatedVariables = await generateVariable(data, folderPath);
+			console.log("SVG Variable 생성 완료");
+
+			// 스프라이트 생성
+			const generatedSprite = await generateSprite(data, folderPath);
+			if (generatedSprite === "compile error") {
+				event.reply("generate-all-done", "스프라이트 컴파일 오류가 발생했습니다.");
+				return;
+			}
+			console.log("SVG Sprite 생성 완료");
+
+			event.reply("generate-all-done", {
+				path: folderPath, // 폴더 경로
+				data: svgInfo, // SVG 아이콘 정보가 담긴 객체
+			});
+		} catch (err) {
+			console.error("폰트 생성 실패:", err);
+			event.reply("generate-all-done", "실패!");
 		}
 	});
 };

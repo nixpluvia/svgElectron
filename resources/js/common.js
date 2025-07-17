@@ -5,6 +5,10 @@ const dropbox = ueye.dropbox({
 });
 
 const _private = {
+    editIcon : {
+        name: null,
+        idx : null,
+    },
     isShiftPressed: false,
     prevChecked : null,
     optimizedIcons: [],
@@ -14,7 +18,8 @@ const _repository = {
     version: '1.0.0',
     description: 'SVG Font Generator using Electron',
     fontName: 'MyCustomFont',
-    fontPrefix : '',
+    fontPrefix : null,
+    colorSet : [],
     icons : [],
 }
 
@@ -44,6 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 아이콘 선택 이벤트
     document.addEventListener('change', function(event) {
         if (event.target.name !== 'iconSelect') return;
         let target = event.target;
@@ -82,7 +88,95 @@ document.addEventListener('DOMContentLoaded', () => {
             _private.isShiftPressed = false;
         }
     });
+
+    const pickr = new Pickr({
+        el: '.pickr-container',
+        theme: 'monolith', // or 'classic'
+        default: '#000000',
+        position : 'right-start',
+        lockOpacity: true,
+        swatches: [
+            'rgba(244, 67, 54)',
+            'rgba(233, 30, 99)',
+            'rgba(156, 39, 176)',
+            'rgba(103, 58, 183)',
+            'rgba(63, 81, 181)',
+            'rgba(33, 150, 243)',
+            'rgba(3, 169, 244)'
+        ],
+        defaultRepresentation: 'HEXA',
+        components: {
+            preview: true,
+            opacity: false,
+            hue: true,
+            interaction: {
+                hex: false,
+                rgba: false,
+                hsva: false,
+                input: true,
+                clear: true,
+                save: true
+            }
+        }
+    });
+
+    // 색상 선택 후 폼에 추가
+    const colorForms = document.querySelector('#colorForms');
+    pickr.on('save', (color, instance) => {
+        const colorHex = color.toHEXA().toString();
+        const html = `
+            <div class="f-color">
+                <span style="background-color: ${colorHex};"></span>
+                <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" placeholder="접미사(suffix)">
+                <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="deleteColor(this)"><i class="i-close"></i></button>
+            </div>
+        `;
+        colorForms.insertAdjacentHTML('beforeend', html);
+        pickr.hide();
+    });
+    new Sortable(colorForms, {
+        animation: 150,
+    });
+
+    // 아이콘 편집 모달 - 이름 수정
+    document.querySelector('#btnEditIconName').addEventListener('click', function() {
+        const titBox = this.closest('.tit-box');
+        const iconName = titBox.querySelector('#modalIconName');
+        const iconNameInput = titBox.querySelector('#editIconName');
+        if (titBox.classList.contains('active')) {
+            titBox.classList.remove('active');
+            iconName.innerHTML = iconNameInput.value;
+        } else {
+            titBox.classList.add('active');
+            iconNameInput.focus();
+        }
+    });
+    modal.setCallback('#editModal', 'close', () => {
+        const titBox = document.querySelector('#editModal .tit-box');
+        titBox.classList.remove('active');
+    });
+
+    // 아이콘 편집 모달 - 저장
+    document.querySelector('#editModalSave').addEventListener('click', function() {
+        const data = _repository.icons[_private.editIcon.idx];
+        const iconNameInput = document.getElementById('editIconName');
+        const iconCardItem = document.querySelector('#iconCards .icon-card[data-icon-name="' + data.name + '"]');
+        iconCardItem.setAttribute('data-icon-name', iconNameInput.value);
+        iconCardItem.querySelector('.tit-sm').innerHTML = iconNameInput.value;
+        data.name = iconNameInput.value;
+
+        // 모달 닫기
+        modal.close('#editModal');
+    });
 });
+
+// 선택된 색상 삭제
+function deleteColor(el) {
+    const colorDiv = el.closest('.f-color');
+    if (colorDiv) {
+        colorDiv.remove();
+    }
+}
 
 // 사용 가이드
 let isRenderedGuide = false;
@@ -101,27 +195,64 @@ async function showGuideModal() {
 
 // 모달 창 열기 메서드
 function showEditModal(iconName) {
-    const icon = _repository.icons.find(icon => icon.name === iconName);
+    let iconIdx = null;
+    const icon = _repository.icons.find((icon, idx) => {
+        if (icon.name === iconName) {
+            iconIdx = idx;
+            return true;
+        }
+    });
     if (icon === undefined) return;
     const preview = document.getElementById('iconPreview');
-    const iconNameTxt = document.getElementById('editIconName');
-    const iconCodeTxt = document.getElementById('editIconCode');
+    const iconNameTxt = document.getElementById('modalIconName');
+    const iconNameInput = document.getElementById('editIconName');
+    const iconTag = document.getElementById('modalIconTag');
+    const iconCss = document.getElementById('modalIconCss');
+    const iconVariable = document.getElementById('modalIconVariable');
+    const iconCode = document.getElementById('modalIconCode');
+
+    let fontPrefix = _repository.fontPrefix || document.getElementById('fontPrefix').value || '';
+    fontPrefix = fontPrefix == "" || fontPrefix == null ? '' : fontPrefix + '-';
+    const cls = `i-${fontPrefix}${icon.name}`;
 
     // 데이터 채우기
     preview.innerHTML = icon.data;
     iconNameTxt.innerHTML = icon.name;
-    iconCodeTxt.innerHTML = icon.code;
+    iconCode.innerHTML = icon.code;
+    iconTag.innerText = `<i class="${cls}" aria-hidden="true"></i>`;
+    iconCss.innerHTML = `.${cls}`;
+    iconVariable.innerHTML = `var(--i-${fontPrefix}${icon.name})`;
+    iconNameInput.value = icon.name;
+
+    // 아이콘 정보 저장
+    _private.editIcon.name = iconName;
+    _private.editIcon.idx = iconIdx;
 
     // 모달 열기
     modal.open('#editModal');
 }
 
 // 클립보드 코드 복사 메서드
-function copyCode(iconName) {
-    const icon = _repository.icons.find(icon => icon.name === iconName);
-    if (icon) {
-        const svgContent = icon.data;
-        core.copyToClipboard(svgContent)
+function copyCode(type) {
+    // const icon = _repository.icons.find(icon => icon.name === iconName);
+    // if (icon) {
+    //     const svgContent = icon.data;
+    //     core.copyToClipboard(svgContent)
+    // }
+    let targetElement;
+    if (type === 'tag') {
+        targetElement = document.getElementById('modalIconTag');
+    } else if (type === 'css') {
+        targetElement = document.getElementById('modalIconCss');
+    } else if (type === 'variable') {
+        targetElement = document.getElementById('modalIconVariable');
+    } else if (type === 'code') {
+        targetElement = document.getElementById('modalIconCode');
+    }
+
+    if (targetElement) {
+        const content = targetElement.innerText;
+        core.copyToClipboard(content);
     }
 }
 
@@ -136,7 +267,7 @@ function deleteIcon(el, iconName) {
     const icon = _repository.icons.find(icon => icon.name === iconName);
     if (icon) {
         _repository.icons = _repository.icons.filter(icon => icon.name !== iconName);
-        el.closest('.icon-card').remove();
+        el.closest('.item').remove();
 
         ueye.toast.action({
             status: 'success',
@@ -160,9 +291,9 @@ function deleteSelectedIcons() {
     const iconNamesToDelete = Array.from(selectedIcons).map(cb => cb.value);
     _repository.icons = _repository.icons.filter(icon => !iconNamesToDelete.includes(icon.name));
     iconNamesToDelete.forEach(iconName => {
-        const iconCard = document.querySelector(`.icon-card[data-icon-name="${iconName}"]`);
-        if (iconCard) {
-            iconCard.remove();
+        const item = document.querySelector(`.icon-card[data-icon-name="${iconName}"]`).closest('.item');
+        if (item) {
+            item.remove();
         }
     });
     ueye.toast.action({

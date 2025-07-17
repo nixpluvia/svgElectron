@@ -49,7 +49,10 @@ async function modalSelectAddIcons(type){
 }
 // SVG Code 추가 메서드
 function selectAddCode(){
-    let svgCode = document.querySelector('#svgAddCode').value;
+    let svgNameEl = document.querySelector('#svgAddName');
+    let svgCodeEl = document.querySelector('#svgAddCode');
+    let svgName = svgNameEl.value;
+    let svgCode = svgCodeEl.value;
     svgCode = svgCode.trim();
     if (svgCode === '') {
         alert('SVG 코드를 입력해주세요.');
@@ -67,7 +70,7 @@ function selectAddCode(){
     }
 
     let svgData = {
-        name: 'new-icon',
+        name: svgName || 'new-icon',
         data: svgCode,
         sizes: "32x32", // 기본값, 필요시 수정 가능
         category: [],
@@ -79,6 +82,10 @@ function selectAddCode(){
     iconCards.appendChild(renderCard(svgData));
     // _repository에 데이터 채우기
     _repository.icons.push(svgData);
+
+    // 폼 필드 초기화
+    svgNameEl.value = '';
+    svgCodeEl.value = '';
 }
 // 폴더 선택 메서드
 async function selectAddFolder() {
@@ -149,6 +156,23 @@ async function selectJson() {
     document.getElementById('projectVersion').value = svgInfo.version || '1.0.0';
     document.getElementById('fontName').value = svgInfo.fontName || 'MyCustomFont';
     document.getElementById('fontPrefix').value = svgInfo.fontPrefix || '';
+
+    // colorSet이 있다면 색상 폼에 추가
+    const colorForms = document.querySelector('#colorForms');
+    colorForms.innerHTML = ''; // 기존 폼 초기화
+    if (svgInfo.colorSet && svgInfo.colorSet.length > 0) {
+        svgInfo.colorSet.forEach(d => {
+            const colorHex = d.color || '#000000';
+            const html = `
+                <div class="f-color">
+                    <span style="background-color: ${colorHex};"></span>
+                    <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" value="${d.suffix || ''}" placeholder="접미사(suffix)">
+                    <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="deleteColor(this)"><i class="i-close"></i></button>
+                </div>
+            `;
+            colorForms.insertAdjacentHTML('beforeend', html);
+        });
+    }
 }
 
 /**
@@ -178,10 +202,10 @@ function renderCard(data) {
                 </div>
                 <div class="content">
                     ${icon.data}
-                    <button type="button" class="btn-copy" onclick="copyCode('${icon.name}')"><span class="blind">COPY</span></button>
+                    <button type="button" class="btn-copy" onclick="showEditModal('${icon.name}')"><span class="blind">COPY</span></button>
                 </div>
                 <button type="button" class="btn-title" onclick="showEditModal('${icon.name}')"><strong class="tit-sm">${icon.name || '이름없음'}</strong></button>
-                <button type="button" class="btn-del" onclick="deleteIcon(this, '${icon.name}')"><span class="blind">삭제</span></button>
+                <button type="button" class="btn-del" onclick="deleteIcon(this, '${icon.name}')"><i class="i-delete"></i><span class="blind">삭제</span></button>
             </div>
         `
         fragment.appendChild(col);
@@ -289,13 +313,7 @@ function optimize(svg){
  * 선택된 SVG 데이터를 전송하는 함수
  */
 function sendSvgData() {
-    const projectTitle = document.getElementById('projectTitle').value || 'SVG Project';
-    const projectDescription = document.getElementById('projectDescription').value || 'A project using SVG icons';
-    const projectVersion = document.getElementById('projectVersion').value || '1.0.0';
-    const fontName = document.getElementById('fontName').value || 'MyCustomFont';
-    const fontPrefix = document.getElementById('fontPrefix').value || '';
     const icons = [];
-
     document.querySelectorAll('input[name="iconSelect"]:checked').forEach(checkbox => {
         const iconName = checkbox.value;
         const iconData = _repository.icons.find(icon => icon.name === iconName);
@@ -313,6 +331,19 @@ function sendSvgData() {
         return false;
     }
 
+    const projectTitle = document.getElementById('projectTitle').value || 'SVG Project';
+    const projectDescription = document.getElementById('projectDescription').value || 'A project using SVG icons';
+    const projectVersion = document.getElementById('projectVersion').value || '1.0.0';
+    const fontName = document.getElementById('fontName').value || 'MyCustomFont';
+    const fontPrefix = document.getElementById('fontPrefix').value || '';
+    document.querySelectorAll('input[name="colorSet"]').forEach(el => {
+        const suffix = el.value.trim();
+        const color = el.dataset.color || '#000000';
+        if (suffix !== '') {
+            _repository.colorSet.push({ suffix, color });
+        }
+    });
+
     ueye.loading.show();
     const data = {
         projectInfo : {
@@ -320,7 +351,8 @@ function sendSvgData() {
             description : projectDescription,
             version : projectVersion,
             fontName : fontName,
-            fontPrefix : fontPrefix
+            fontPrefix : fontPrefix,
+            colorSet : _repository.colorSet || []
         },
         icons : icons
     }
@@ -330,10 +362,25 @@ function sendSvgData() {
 function requestGenerate(type){
     const data = sendSvgData();
     if (data === false || type === undefined) return;
-    if (type === 'variable') {
+    
+    if (type === 'all') {
+        if (confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?')) {
+            window.electronAPI.generateAll(data);
+        }
+    } else if (type === 'variable') {
         window.electronAPI.generateVariable(data);
     } else if (type === 'font') {
-        window.electronAPI.generateFont(data);
+        if (confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?')) {
+            window.electronAPI.generateFont(data);
+        }
+    } else if (type === 'sprite') {
+        if (_repository.colorSet.length > 0) {
+            if (confirm('Color Set을 사용할 경우 Path로 구성된 SVG만 색상 변경 생성이 가능합니다.\n\n계속하시겠습니까?')) {
+                window.electronAPI.generateSprite(data);
+            }
+        } else {
+            window.electronAPI.generateSprite(data);
+        }
     }
 }
 
@@ -372,5 +419,39 @@ window.electronAPI.onGenerateVariableDone((event, arg) => {
         });
         return;
     }
+    ueye.loading.hide();
+});
+/**
+ * sprite css 생성을 완료했을 때 호출되는 함수
+ */
+window.electronAPI.onGenerateSpriteDone((event, arg) => {
+    if (typeof arg === 'string' && arg !== 'success') {
+        ueye.loading.hide();
+        ueye.toast.action({
+            status: 'warning',
+            message: arg,
+            type : 'mini'
+        });
+        return;
+    }
+    ueye.loading.hide();
+});
+/**
+ * sprite css 생성을 완료했을 때 호출되는 함수
+ */
+window.electronAPI.onGenerateAllDone((event, arg) => {
+    if (typeof arg === 'string') {
+        ueye.loading.hide();
+        ueye.toast.action({
+            status: 'warning',
+            message: arg,
+            type : 'mini'
+        });
+        return;
+    }
+    const iconCards = document.getElementById('iconCards');
+    const svgInfo = arg.data;
+    iconCards.innerHTML = '';
+    iconCards.appendChild(renderCard(svgInfo.icons));
     ueye.loading.hide();
 });

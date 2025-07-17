@@ -1,0 +1,36 @@
+@font-face {
+    font-family: 'Icons';
+    font-weight: 400;
+    src: url(./Icons.ttf) format('truetype');
+}
+
+[class*="i-c-"] {display: inline-block; line-height: inherit; font-size: inherit; color: inherit; font-family: "Icons"; font-style: normal; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}
+[class*="i-c-"]::before {content: "";}
+
+[class*="i-c-"][data-size="lg"] {font-size: 1.3333em; line-height: .75em; vertical-align: -.0667em;}
+[class*="i-c-"][data-size="xl"] {font-size: 1.5em; line-height: .6666em; vertical-align: -.075em;}
+[class*="i-c-"][data-size="xxs"] {font-size: .5em;}
+[class*="i-c-"][data-size="xs"] {font-size: .75em;}
+[class*="i-c-"][data-size="sm"] {font-size: .875em;}
+[class*="i-c-"][data-size="1x"] {font-size: 1em;}
+[class*="i-c-"][data-size="2x"] {font-size: 2em;}
+[class*="i-c-"][data-size="3x"] {font-size: 3em;}
+[class*="i-c-"][data-size="4x"] {font-size: 4em;}
+[class*="i-c-"][data-size="5x"] {font-size: 5em;}
+[class*="i-c-"][data-size="6x"] {font-size: 6em;}
+[class*="i-c-"][data-size="7x"] {font-size: 7em;}
+[class*="i-c-"][data-size="8x"] {font-size: 8em;}
+[class*="i-c-"][data-size="9x"] {font-size: 9em;}
+[class*="i-c-"][data-size="10x"] {font-size: 10em;}
+
+
+
+.i-c-edit::before { content: "\e001"; }
+.i-c-help::before { content: "\e002"; }
+.i-c-code::before { content: "\e003"; }
+.i-c-unicode::before { content: "\e004"; }
+.i-c-css::before { content: "\e005"; }
+.i-c-variable::before { content: "\e006"; }
+.i-c-folder::before { content: "\e007"; }
+.i-c-file::before { content: "\e008"; }
+.i-c-palette::before { content: "\e009"; }

@@ -1,0 +1,92 @@
+@font-face {
+    font-family: 'SystemIcons';
+    font-weight: 400;
+    src: url(./SystemIcons.ttf) format('truetype');
+}
+
+[class*="i-"] {display: inline-block; line-height: inherit; font-size: inherit; color: inherit; font-family: "SystemIcons"; font-style: normal; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;}
+[class*="i-"]::before {content: "";}
+
+[class*="i-"][data-size="lg"] {font-size: 1.3333em; line-height: .75em; vertical-align: -.0667em;}
+[class*="i-"][data-size="xl"] {font-size: 1.5em; line-height: .6666em; vertical-align: -.075em;}
+[class*="i-"][data-size="xxs"] {font-size: .5em;}
+[class*="i-"][data-size="xs"] {font-size: .75em;}
+[class*="i-"][data-size="sm"] {font-size: .875em;}
+[class*="i-"][data-size="1x"] {font-size: 1em;}
+[class*="i-"][data-size="2x"] {font-size: 2em;}
+[class*="i-"][data-size="3x"] {font-size: 3em;}
+[class*="i-"][data-size="4x"] {font-size: 4em;}
+[class*="i-"][data-size="5x"] {font-size: 5em;}
+[class*="i-"][data-size="6x"] {font-size: 6em;}
+[class*="i-"][data-size="7x"] {font-size: 7em;}
+[class*="i-"][data-size="8x"] {font-size: 8em;}
+[class*="i-"][data-size="9x"] {font-size: 9em;}
+[class*="i-"][data-size="10x"] {font-size: 10em;}
+
+
+
+.i-arr1-down::before { content: "\e001"; }
+.i-arr1-left::before { content: "\e002"; }
+.i-arr1-right::before { content: "\e003"; }
+.i-arr1-up::before { content: "\e004"; }
+.i-arr2-down::before { content: "\e005"; }
+.i-arr2-left::before { content: "\e006"; }
+.i-arr2-right::before { content: "\e007"; }
+.i-arr2-up::before { content: "\e008"; }
+.i-arr3-down::before { content: "\e009"; }
+.i-arr3-left::before { content: "\e00a"; }
+.i-arr3-right::before { content: "\e00b"; }
+.i-arr3-up::before { content: "\e00c"; }
+.i-search::before { content: "\e00d"; }
+.i-check::before { content: "\e00e"; }
+.i-close::before { content: "\e00f"; }
+.i-plus::before { content: "\e010"; }
+.i-minus::before { content: "\e011"; }
+.i-more::before { content: "\e012"; }
+.i-more-2::before { content: "\e013"; }
+.i-slide-play::before { content: "\e014"; }
+.i-slide-pause::before { content: "\e015"; }
+.i-slide-stop::before { content: "\e016"; }
+.i-link-share::before { content: "\e017"; }
+.i-copy::before { content: "\e018"; }
+.i-copy2::before { content: "\e019"; }
+.i-link::before { content: "\e01a"; }
+.i-date::before { content: "\e01b"; }
+.i-delete::before { content: "\e01c"; }
+.i-menu::before { content: "\e01d"; }
+.i-global::before { content: "\e01e"; }
+.i-attachment::before { content: "\e01f"; }
+.i-download::before { content: "\e020"; }
+.i-upload::before { content: "\e021"; }
+.i-save::before { content: "\e022"; }
+.i-file::before { content: "\e023"; }
+.i-img::before { content: "\e024"; }
+.i-tel::before { content: "\e025"; }
+.i-mail::before { content: "\e026"; }
+.i-map-pin::before { content: "\e027"; }
+.i-map::before { content: "\e028"; }
+.i-print::before { content: "\e029"; }
+.i-keyboard::before { content: "\e02a"; }
+.i-share::before { content: "\e02b"; }
+.i-moon-fill::before { content: "\e02c"; }
+.i-moon::before { content: "\e02d"; }
+.i-notice-fill::before { content: "\e02e"; }
+.i-notice::before { content: "\e02f"; }
+.i-option::before { content: "\e030"; }
+.i-settings-fill::before { content: "\e031"; }
+.i-settings::before { content: "\e032"; }
+.i-login::before { content: "\e033"; }
+.i-home::before { content: "\e034"; }
+.i-fullscreen::before { content: "\e035"; }
+.i-user1::before { content: "\e036"; }
+.i-user2::before { content: "\e037"; }
+.i-user3::before { content: "\e038"; }
+.i-zoom-in-line::before { content: "\e039"; }
+.i-zoom-out-line::before { content: "\e03a"; }
+.i-sun::before { content: "\e03b"; }
+.i-sun-fill::before { content: "\e03c"; }
+.i-thumb-up::before { content: "\e03d"; }
+.i-thumb-down::before { content: "\e03e"; }
+.i-thumb-up-fill::before { content: "\e03f"; }
+.i-thumb-down-fill::before { content: "\e040"; }
+.i-video-fill::before { content: "\e041"; }

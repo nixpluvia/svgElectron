@@ -326,46 +326,6 @@ ul [data-list*="4"] > li:first-child {margin-top: var(--r-02);}
 
 
 /*-------------------------------------------------------------------
-	분류그룹 : 텍스트 타입
-	속성순서 : Expression > Buttons
--------------------------------------------------------------------*/
-.btn-txt {display: inline-flex; height: auto; padding: 0 var(--r-04); border: 0; border-radius: var(--radius-4); background-color: transparent; line-height: inherit; font-weight: 500; font-size: 1.7rem; color: var(--color-gray-90); text-align: center; cursor: pointer; align-items: center;}
-
-/*-------------------------------------------------------------------
-	@variation
--------------------------------------------------------------------*/
-/* size */
-.btn-txt[data-size="xs"] {font-size: 1.5rem;}
-.btn-txt[data-size="sm"] {font-size: 1.5rem;}
-.btn-txt[data-size="lg"] {padding: 0 var(--r-08); font-size: 1.7rem;}
-.btn-txt[data-size="xl"] {padding: 0 var(--r-08); border-radius: var(--radius-6); font-size: 1.9rem;}
-/* hierarchy */
-.btn-txt[data-level="primary"] {color: var(--color-primary);}
-.btn-txt[data-level="secondary"], 
-.btn-txt[data-level="tertiary"] {color: inherit;}
-/* icon */
-.btn-txt[class*=i-]::after {width: var(--r-16); height: var(--r-16);}
-.btn-txt[class*=i-][data-size="lg"]::after {width: var(--r-20); height: var(--r-20); margin-left: var(--r-04);}
-.btn-txt[class*=i-][data-size="xl"]::after {width: var(--r-24); height: var(--r-24); margin-left: var(--r-04);}
-
-.btn-txt.i-link, .btn-txt.i-blank {text-decoration: underline;}
-.btn-txt.i-link[data-level="primary"]::after {background-image: url(../images/common/i_arr_right_on.svg);}
-.btn-txt.i-blank[data-level="primary"]::after {background-image: url(../images/common/i_blank_on.svg);}
-
-/*-------------------------------------------------------------------
-	@interaction
--------------------------------------------------------------------*/
-.btn-txt:focus-visible,
-.btn-txt:hover {background-color: var(--color-secondary-5);}
-.btn-txt[data-level="primary"]:focus-visible,
-.btn-txt[data-level="primary"]:hover {color: var(--color-primary-60);}
-.btn-txt[data-level="tertiary"]:focus-visible,
-.btn-txt[data-level="tertiary"]:hover,
-.btn-txt[data-level="point"]:focus-visible,
-.btn-txt[data-level="point"]:hover {color: var(--color-primary);}
- 
-
-/*-------------------------------------------------------------------
 	분류이름: 공용 닫기 버튼
 	분류그룹: Expression > Buttons
 -------------------------------------------------------------------*/

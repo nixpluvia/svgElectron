@@ -255,41 +255,41 @@ select::-ms-expand {display: none;}
     --color-green-90: #002207;
 
     /* 색상 > primary */
-    --color-primary: #246BEB;
-    --color-primary-5: #EFF5FF;
-    --color-primary-10: #D3E1FB;
-    --color-primary-20: #A7C4F7;
-    --color-primary-30: #7CA6F3;
-    --color-primary-40: #5089EF;
-    --color-primary-50: #246BEB;
-    --color-primary-60: #1D56BC;
-    --color-primary-70: #16408D;
-    --color-primary-80: #0E2B5E;
-    --color-primary-90: #07152F;
+    --color-primary: #727cf5;
+    --color-primary-5: #f2f3fe;
+    --color-primary-10: #e0e3fb;
+    --color-primary-20: #c3c8f7;
+    --color-primary-30: #a7adf3;
+    --color-primary-40: #8a92ef;
+    --color-primary-50: #727cf5;
+    --color-primary-60: #5a65c2;
+    --color-primary-70: #434d91;
+    --color-primary-80: #2c3460;
+    --color-primary-90: #161a30;
     /* 색상 > secondary */
-    --color-secondary: #4A90E2;
-    --color-secondary-5: #F3F8FD;
-    --color-secondary-10: #D9E8FA;
-    --color-secondary-20: #B0D1F5;
-    --color-secondary-30: #87BAF0;
-    --color-secondary-40: #5EA3EB;
-    --color-secondary-50: #4A90E2;
-    --color-secondary-60: #3572B3;
-    --color-secondary-70: #255382;
-    --color-secondary-80: #173652;
-    --color-secondary-90: #0A1A29;
+    --color-secondary: #0acf97;
+    --color-secondary-5: #e6fcf3;
+    --color-secondary-10: #c3f7e2;
+    --color-secondary-20: #8aeec7;
+    --color-secondary-30: #4fe6ad;
+    --color-secondary-40: #23dc98;
+    --color-secondary-50: #0acf97;
+    --color-secondary-60: #099f76;
+    --color-secondary-70: #077f5e;
+    --color-secondary-80: #055f46;
+    --color-secondary-90: #033f2e;
     /* 색상 > point */
-    --color-point: #EBB778;
-    --color-point-5: #FFF8ED;
-    --color-point-10: #FDEFD9;
-    --color-point-20: #F9E1B6;
-    --color-point-30: #F5D393;
-    --color-point-40: #F1C570;
-    --color-point-50: #EBB778;
-    --color-point-60: #C99A5F;
-    --color-point-70: #A77D46;
-    --color-point-80: #85602D;
-    --color-point-90: #634314;
+    --color-point: #fa5c7c;
+    --color-point-5: #fff3f6;
+    --color-point-10: #ffe0e8;
+    --color-point-20: #ffb8c7;
+    --color-point-30: #ff8fa6;
+    --color-point-40: #ff6685;
+    --color-point-50: #fa5c7c;
+    --color-point-60: #d94e6a;
+    --color-point-70: #b74058;
+    --color-point-80: #943246;
+    --color-point-90: #702434;
 
     /* 색상 > gray */
     --color-gray-5: #F8F8F8;
