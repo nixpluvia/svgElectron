@@ -18,20 +18,25 @@ module.exports = function () {
 		return dialogResult.filePaths[0]; // 폴더 경로 반환
 	}
 
+	function generateJson(data, folderPath) {
+		const filteredIcons = data.icons.filter(icon => icon.isClone !== true); // 클론 아이콘 제외
+		
+		const svgInfo = {
+			...data.projectInfo,
+			icons : filteredIcons,
+		}
+		const projectTitle = svgInfo.title || "sim";
+		fs.writeFileSync(path.join(folderPath, projectTitle + ".json"), JSON.stringify(svgInfo, null, 2), "utf8");
+
+		return svgInfo; // JSON 데이터 반환
+	}
+
 	/**
 	 * SVG 폰트 생성을 위한 함수
 	 * @param {*} param0
 	 * @returns
 	 */
 	async function generateFont({ data, folderPath }) {
-		// 아이콘 정보 객체 생성
-		const svgInfo = {
-			...data.projectInfo,
-			icons : data.icons,
-		}
-		const projectTitle = svgInfo.title || "sim";
-		fs.writeFileSync(path.join(folderPath, projectTitle + ".json"), JSON.stringify(svgInfo, null, 2), "utf8");
-
 		return new Promise((resolve, reject) => {
 			const fontStream = new SVGIcons2SVGFontStream({
 				fontName: projectTitle,
@@ -54,7 +59,7 @@ module.exports = function () {
 				const ttf = svg2ttf(svgFontContent, {});
 				fs.writeFileSync(ttfFontPath, Buffer.from(ttf.buffer));
 
-				resolve(svgInfo);
+				resolve('success'); // 성공적으로 생성된 경우
 			});
 
 			// 에러 처리
@@ -63,7 +68,7 @@ module.exports = function () {
 			});
 
 			// 여러 SVG 아이콘 추가
-			svgInfo.icons.forEach((icon, index) => {
+			data.icons.forEach((icon, index) => {
 				const glyphStream = require("stream").Readable.from(icon.data);
 				glyphStream.metadata = {
 					unicode: [String.fromCharCode(parseInt(icon.code, 16))],
@@ -150,7 +155,8 @@ module.exports = function () {
 				event.reply("generate-font-done", "폴더 선택이 취소되었습니다.");
 				return;
 			}
-			const svgInfo = await generateFont({data, folderPath}); // 최적화된 데이터 사용
+			const svgInfo = generateJson(data, folderPath); // JSON 파일 생성
+			await generateFont({data, folderPath}); // 최적화된 데이터 사용
 			console.log("SVG 아이콘 최적화 및 폰트 생성 완료");
 			event.reply("generate-font-done", {
 				path: folderPath, // 폴더 경로
@@ -174,10 +180,30 @@ module.exports = function () {
 		const folderPath = paramPath || await selectFolder();
 		if (!folderPath) return null;
 
-		const iconsData = data.icons;
+		let iconsData = data.icons;
 		if (!Array.isArray(iconsData) || iconsData.length === 0) {
 			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
 			return null;
+		}
+
+		const colorSet = data.projectInfo.colorSet;
+		if (colorSet && colorSet.length > 0) {
+			let newIcons = [];
+			for (const icon of iconsData) {
+				icon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${data.projectInfo.baseColor}"`); // 기본 색상으로 변경
+				newIcons.push(icon); // 원본 아이콘 추가
+				// 색상 세트에 따라 클론 아이콘 생성
+				for (const d of colorSet) {
+					const clonedIcon = { ...icon };
+					clonedIcon.name = `${icon.name}${d.suffix ? `-${d.suffix}` : ''}`;
+					clonedIcon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${d.color}"`);
+					clonedIcon.code = "";
+					clonedIcon.isClone = true;
+					newIcons.push(clonedIcon);
+				}
+			}
+			data.icons = newIcons;
+			iconsData = data.icons;
 		}
 
 		const fontPrefix = data.projectInfo.fontPrefix || '';
@@ -225,9 +251,10 @@ module.exports = function () {
 				event.reply("generate-variable-done", "폴더 선택이 취소되었습니다.");
 				return;
 			}
+			const svgInfo = generateJson(data, folderPath); // JSON 파일 생성
 			event.reply("generate-variable-done", {
 				path: folderPath, // 폴더 경로
-				data: "success", // SVG 아이콘 정보가 담긴 객체
+				data: svgInfo, // SVG 아이콘 정보가 담긴 객체
 			});
 		} catch (err) {
 			console.error("폰트 생성 실패:", err);
@@ -266,10 +293,29 @@ module.exports = function () {
 		const folderPath = paramPath || await selectFolder(); // svg 아이콘 목록 경로
 		if (!folderPath) return null;
 		
-		const iconsData = data.icons;
+		let iconsData = data.icons;
 		if (!Array.isArray(iconsData) || iconsData.length === 0) {
 			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
 			return null;
+		}
+		const colorSet = data.projectInfo.colorSet;
+		if (colorSet && colorSet.length > 0) {
+			let newIcons = [];
+			for (const icon of iconsData) {
+				icon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${data.projectInfo.baseColor}"`); // 기본 색상으로 변경
+				newIcons.push(icon); // 원본 아이콘 추가
+				// 색상 세트에 따라 클론 아이콘 생성
+				for (const d of colorSet) {
+					const clonedIcon = { ...icon };
+					clonedIcon.name = `${icon.name}${d.suffix ? `-${d.suffix}` : ''}`;
+					clonedIcon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${d.color}"`);
+					clonedIcon.code = "";
+					clonedIcon.isClone = true;
+					newIcons.push(clonedIcon);
+				}
+			}
+			data.icons = newIcons;
+			iconsData = data.icons;
 		}
 
 		const newFolderPath = path.join(folderPath, "sprite");
@@ -321,10 +367,11 @@ module.exports = function () {
 				event.reply("generate-sprite-done", "스프라이트 컴파일 오류가 발생했습니다.");
 				return;
 			}
+			const svgInfo = generateJson(data, folderPath); // JSON 파일 생성
 			console.log("SVG Sprite 생성 완료");
 			event.reply("generate-sprite-done", {
 				path: folderPath, // 폴더 경로
-				data: "success", // SVG 아이콘 정보가 담긴 객체
+				data: svgInfo, // SVG 아이콘 정보가 담긴 객체
 			});
 		} catch (err) {
 			console.error("폰트 생성 실패:", err);
@@ -347,12 +394,12 @@ module.exports = function () {
 			};
 
 			// 폰트 생성
-			const generatedIcons = await optimizeIcons(data, folderPath);
-			const svgInfo = await generateFont({data, folderPath}); // 최적화된 데이터 사용
+			await optimizeIcons(data, folderPath);
+			await generateFont({data, folderPath}); // 최적화된 데이터 사용
 			console.log("SVG 아이콘 최적화 및 폰트 생성 완료");
 
 			// CSS Value Sheet 생성
-			const generatedVariables = await generateVariable(data, folderPath);
+			await generateVariable(data, folderPath);
 			console.log("SVG Variable 생성 완료");
 
 			// 스프라이트 생성
@@ -363,6 +410,8 @@ module.exports = function () {
 			}
 			console.log("SVG Sprite 생성 완료");
 
+			// JSON 파일 생성
+			const svgInfo = generateJson(data, folderPath);
 			event.reply("generate-all-done", {
 				path: folderPath, // 폴더 경로
 				data: svgInfo, // SVG 아이콘 정보가 담긴 객체

@@ -31,7 +31,7 @@ body.open-mobile {overflow: hidden; height: 100%;}
 #header .header-top .btn-toggle {display: block; margin-right: 2rem; width: 4rem; height: 4rem; background-color: transparent; line-height: 4rem; font-size: 3.2rem; color: #fff;}
 #header .header-top .btn-toggle i {display: block;}
 #header .header-top .logo {display: flex; background-color: transparent; font-weight: 500; color: #ffffff; align-items: center;}
-#header .header-top .logo strong {display: block; overflow: hidden; width: 100%; font-size: 2rem; font-weight: 700; text-decoration: none;}
+#header .header-top .logo strong {display: block; overflow: hidden; width: 100%; font-size: 2rem; font-weight: 400; text-decoration: none; font-family: 'yg-jalnan', 'Pretendard', 'Noto Sans KR', sans-serif;}
 #header .header-top .utils {display: flex; margin-left: auto; align-items: center; gap: 1rem;}
 #header .header-top .utils .f-search {display: flex;}
 #header .header-top .utils .f-search > :first-child {border-radius: 0.4rem 0 0 0.4rem;}
@@ -65,10 +65,10 @@ body.open-mobile {overflow: hidden; height: 100%;}
 #container {display: block; min-height: 100vh; padding: 6rem 0 0 38rem; background-color: #fafbfe;}
 
 
-#intro {display: flex; padding: 4rem; background: #fafbfe; gap: 2rem; flex-wrap: wrap; align-items: flex-end;}
+#intro {display: flex; position: relative; padding: 4rem; color: #313a46; gap: 2rem; flex-wrap: wrap; align-items: flex-end; font-family: 'yg-jalnan', 'Pretendard', 'Noto Sans KR', sans-serif;}
+#intro::before {content: ""; position: absolute; bottom: 0; left: 4rem; width: calc(100% - 8rem); height: 6px; border-width: 2px 0; border-style: solid; border-color: var(--color-primary-20);}
 #intro .la {flex-shrink: 0;}
 #intro .title {display: flex; color: var(--color-primary); align-items: center;}
-#intro .title svg {margin-right: 1rem;}
 
 /*-------------------------------------------------------------------
 	@interaction
@@ -98,7 +98,7 @@ body.open-mobile {overflow: hidden; height: 100%;}
 .icon-card {display: block; overflow: hidden; position: relative; border: 1px solid var(--color-gray-30); border-radius: 0.6rem; background-color: #ffffff;}
 .icon-card .ck {display: flex; position: absolute; top: 1rem; left: 1rem; z-index: 2; align-items: center; gap: 0.8rem;}
 .icon-card .ck .err {width: 0.8rem; height: 0.8rem; border-radius: 999px; background-color: var(--color-red);}
-.icon-card .content {display: block; position: relative; padding: 2rem; aspect-ratio: 1 / 1;}
+.icon-card .content {display: block; position: relative; padding: 2rem; aspect-ratio: 1 / 1; color: var(--base-color, #000000);}
 .icon-card .content svg {display: block; margin: 0 auto; max-width: 100%; max-height: 100%;}
 .icon-card .content .btn-copy {position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: transparent;}
 .icon-card .btn-title {display: block; overflow: hidden; width: 100%; background-color: transparent; padding: 0.6rem; border-top: 1px solid var(--color-gray-30); align-items: center;}

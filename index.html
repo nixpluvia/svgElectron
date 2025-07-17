@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./resources/css/common.css">
     <link rel="stylesheet" href="./resources/font/SystemIcons.css">
     <link rel="stylesheet" href="./resources/font/icons.css">
-	<link rel="stylesheet" href="./resources/css/style.css">
+	<!-- <link rel="stylesheet" href="./resources/css/style.css"> -->
 	<link rel="stylesheet" href="./resources/css/components.css">
 	<link rel="stylesheet" href="./resources/css/layout.css">
 	<link rel="stylesheet" href="./resources/css/main.css">
@@ -53,35 +53,76 @@
         <div id="side" class="header-side">
             <div class="bd">
                 <h4 class="tit-lg">프로젝트 정보</h4>
-                <div class="g-row gap-08">
+                <div class="g-row gap-12">
                     <label class="col-12">
-                        <strong class="tit-sm">이름<small class="txt-xs">(Project Title)</small></strong>
+                        <h5 class="tit-sm m-b-08">이름<small class="txt-xs">(Project Title)</small></h5>
                         <input type="text" class="f-control" id="projectTitle" data-size="xs">
                     </label>
                     <label class="col-12">
-                        <strong class="tit-sm">설명<small class="txt-xs">(Description)</small></strong>
+                        <h5 class="tit-sm m-b-08">설명<small class="txt-xs">(Description)</small></h5>
                         <input type="text" class="f-control" id="projectDescription" data-size="xs">
                     </label>
                     <div class="col-12">
-                        <strong class="tit-sm">버전<small class="txt-xs">(Version)</small></strong>
-                        <div class="g-row gap-04">
-                            <label class="col"><input type="text" class="f-control" id="projectVersion" data-size="xs" value="1.0.0" readonly></label>
-                            <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="form_main.changeVersion(-1)"><i class="i-minus"></i></button></div>
-                            <div class="col-auto"><button type="button" class="btn" data-level="1" data-size="xs" onclick="form_main.changeVersion(1)"><i class="i-plus"></i></button></div>
+                        <h5 class="tit-sm m-b-08">버전<small class="txt-xs">(Version)</small></h5>
+                        <div class="g-row gap-04 align-items-center">
+                            <div class="col-auto w-36">
+                                <button type="button" class="btn p-0" data-level="1" data-size="xs grow" onclick="form_main.changeVersion('major', 1)"><i class="i-arr1-up"></i></button>
+                                <input type="text" class="f-control m-t-04 m-b-04" id="versionMajor" data-size="xs" value="1" readonly>
+                                <button type="button" class="btn p-0" data-level="1" data-size="xs grow" onclick="form_main.changeVersion('major', -1)"><i class="i-arr1-down"></i></button>
+                            </div>
+                            <div class="col-auto w-16 text-center">.</div>
+                            <div class="col-auto w-36">
+                                <button type="button" class="btn p-0" data-level="1" data-size="xs grow" onclick="form_main.changeVersion('minor', 1)"><i class="i-arr1-up"></i></button>
+                                <input type="text" class="f-control m-t-04 m-b-04" id="versionMinor" data-size="xs" value="0" readonly>
+                                <button type="button" class="btn p-0" data-level="1" data-size="xs grow" onclick="form_main.changeVersion('minor', -1)"><i class="i-arr1-down"></i></button>
+                            </div>
+                            <div class="col-auto w-16 text-center">.</div>
+                            <div class="col-auto w-36">
+                                <button type="button" class="btn p-0" data-level="1" data-size="xs grow" onclick="form_main.changeVersion('patch', 1)"><i class="i-arr1-up"></i></button>
+                                <input type="text" class="f-control m-t-04 m-b-04" id="versionPatch" data-size="xs" value="0" readonly>
+                                <button type="button" class="btn p-0" data-level="1" data-size="xs grow" onclick="form_main.changeVersion('patch', -1)"><i class="i-arr1-down"></i></button>
+                            </div>
                         </div>
                     </div>
                 </div>
                 <hr class="divider" />
-                <div class="g-row gap-08">
+                <div class="g-row gap-12">
                     <div class="col-12">
-                        <strong class="tit-sm">접두사<small class="txt-xs">(Prefix)</small></strong>
+                        <div class="flex m-b-08 align-items-center">
+                            <h5 class="tit-sm">접두사<small class="txt-xs">(Prefix)</small></h5>
+                            <label class="f-switch-right-inline m-l-auto">
+                                <input type="checkbox" id="useFontPrefix">
+                                <span>사용</span>
+                            </label>
+                        </div>
                         <input type="text" class="f-control" id="fontPrefix" data-size="xs">
                     </div>
                     <div class="col-12">
-                        <strong class="tit-sm">색상 세트<small class="txt-xs">(Color Set)</small></strong>
+                        <div class="flex m-b-08 align-items-center">
+                            <h5 class="tit-sm">기본 색상<small class="txt-xs">(Color)</small></h5>
+                            <label class="f-switch-right-inline m-l-auto">
+                                <input type="checkbox" id="useBaseColor">
+                                <span>사용</span>
+                            </label>
+                        </div>
                         <div class="g-row gap-08">
                             <div class="col-3">
-                                <div class="pickr-container"></div>
+                                <div id="pickr1"></div>
+                                <input type="hidden" id="baseColor">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="flex m-b-08 align-items-center">
+                            <h5 class="tit-sm">색상 세트<small class="txt-xs">(Color Set)</small></h5>
+                            <label class="f-switch-right-inline m-l-auto">
+                                <input type="checkbox" id="useColorSet">
+                                <span>사용</span>
+                            </label>
+                        </div>
+                        <div class="g-row gap-08">
+                            <div class="col-3">
+                                <div id="pickr2"></div>
                             </div>
                             <div id="colorForms" class="col-9">
                                 <!-- <div class="f-color">
@@ -97,30 +138,30 @@
             <div class="ft">
                 <div class="g-row gap-08">
                     <div class="col">
-                        <button class="btn" data-size="grow sm" data-s="outline" data-level="1" onclick="selectFolder()">폴더 불러오기</button>
+                        <button class="btn" data-size="grow sm" data-s="outline" data-level="1" onclick="select_util.selectFolder()">폴더 불러오기</button>
                     </div>
                     <div class="col">
-                        <button class="btn" data-size="grow sm" data-s="outline" data-level="1" onclick="selectJson()">JSON 불러오기</button>
+                        <button class="btn" data-size="grow sm" data-s="outline" data-level="1" onclick="select_util.selectJson()">JSON 불러오기</button>
                     </div>
                 </div>
                 <hr class="divider" />
                 <div class="btn-group" data-dropbox-wrap="btnDrop">
-                    <button type="button" class="btn btn-main" data-level="1" data-size="sm grow" onclick="requestGenerate('all')"><i class="i-download m-r-08" data-size="lg"></i> 프로젝트 전체 생성</button>
+                    <button type="button" class="btn btn-main" data-level="1" data-size="sm grow" onclick="generater.request('all')"><i class="i-download m-r-08" data-size="lg"></i> 전체 포맷 생성</button>
                     <button type="button" class="btn btn-sub" data-level="1" data-size="sm" data-dropbox-trigger="btnDrop"><i class="i-more"></i></button>
                     <div class="dropbox-content ani p-12" data-dropbox-target="btnDrop">
                         <ul data-list="down">
                             <li>
-                                <button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="requestGenerate('variable')">
+                                <button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="generater.request('variable')">
                                     <i class="i-download m-r-08" data-size="lg"></i> CSS Value Sheet 생성
                                 </button>
                             </li>
                             <li>
-                                <button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="requestGenerate('sprite')">
+                                <button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="generater.request('sprite')">
                                     <i class="i-download m-r-08" data-size="lg"></i> 스프라이트 SVG 생성
                                 </button>
                             </li>
                             <li>
-                                <button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="requestGenerate('font')">
+                                <button type="button" class="btn" data-level="1" data-size="xs grow" data-s="outline" onclick="generater.request('font')">
                                     <i class="i-download m-r-08" data-size="lg"></i> 폰트 생성
                                 </button>
                             </li>
@@ -136,7 +177,6 @@
             <div class="la">
                 <div class="title" data-section="6">
                     <h2 class="tit-visual-md">Simply Icon Manager</h2>
-
                 </div>
                 <p class="lead" data-section="6">
                     프로젝트에 사용할 SVG 폰트를 쉽게 생성하고 관리하세요.<br>
@@ -262,12 +302,12 @@
                         <h4 class="tit-sm">코드 추가</h4>
                         <input type="text" id="svgAddName" class="f-control" placeholder="SVG 이름">
                         <textarea name="svgAddCode" id="svgAddCode" class="f-control" placeholder="SVG 코드"></textarea>
-                        <button type="button" class="btn btn-submit" data-level="1" data-size="grow" onclick="modalSelectAddIcons('code')">SVG 추가</button>
+                        <button type="button" class="btn btn-submit" data-level="1" data-size="grow" onclick="edit_api.modalSelectAddIcons('code')">SVG 추가</button>
                     </div>
                     <div class="area btn-area">
                         <h4 class="tit-sm">파일 추가</h4>
-                        <button type="button" class="btn" data-level="1" data-size="grow" data-s="outline" onclick="modalSelectAddIcons('svg')">SVG 파일 선택</button>
-                        <button type="button" class="btn" data-level="1" data-size="grow" data-s="outline" onclick="modalSelectAddIcons('folder')">폴더 선택</button>
+                        <button type="button" class="btn" data-level="1" data-size="grow" data-s="outline" onclick="edit_api.modalSelectAddIcons('svg')">SVG 파일 선택</button>
+                        <button type="button" class="btn" data-level="1" data-size="grow" data-s="outline" onclick="edit_api.modalSelectAddIcons('folder')">폴더 선택</button>
                     </div>
                 </div>
             </div>

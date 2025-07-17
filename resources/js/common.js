@@ -93,16 +93,14 @@ const layout_main = {
             }
         });
     },
-    // 선택된 색상 삭제
-    deleteColor(el) {
-        const colorDiv = el.closest('.f-color');
-        if (colorDiv) {
-            colorDiv.remove();
-        }
-    }
 }
 
 const form_main = {
+    _private : {
+        styleSheet : null,
+        pickr1: null,
+        pickr2: null,
+    },
     init (){
         let ins = this;
 
@@ -120,9 +118,7 @@ const form_main = {
             ins.searchIcons(searchTerm);
         });
 
-        // 색상 셋
-        const pickr = new Pickr({
-            el: '.pickr-container',
+        const pickrOptions = {
             theme: 'monolith', // or 'classic'
             default: '#000000',
             position : 'right-start',
@@ -146,28 +142,63 @@ const form_main = {
                     rgba: false,
                     hsva: false,
                     input: true,
-                    clear: true,
+                    clear: false,
                     save: true
                 }
             }
+        }
+
+        // 색상 셋
+        _private.styleSheet = document.createElement('style');
+        document.head.appendChild(_private.styleSheet);
+        this._private.pickr1 = new Pickr({
+            ...pickrOptions,
+            el: '#pickr1',
+        });
+        this._private.pickr1.on('save', (color, instance) => {
+            const colorHex = color.toHEXA().toString();
+            document.getElementById('baseColor').value = colorHex;
+            _private.styleSheet.textContent = `:root { --base-color: ${colorHex}; }`;
+            this._private.pickr1.hide();
+        });
+
+        // 색상 셋
+        this._private.pickr2 = new Pickr({
+            ...pickrOptions,
+            el: '#pickr2',
         });
         // 색상 선택 후 폼에 추가
         const colorForms = document.querySelector('#colorForms');
-        pickr.on('save', (color, instance) => {
+        this._private.pickr2.on('save', (color, instance) => {
             const colorHex = color.toHEXA().toString();
             const html = `
                 <div class="f-color">
                     <span style="background-color: ${colorHex};"></span>
                     <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" placeholder="접미사(suffix)">
-                    <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="deleteColor(this)"><i class="i-close"></i></button>
+                    <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="form_main.deleteColor(this)"><i class="i-close"></i></button>
                 </div>
             `;
             colorForms.insertAdjacentHTML('beforeend', html);
-            pickr.hide();
+            this._private.pickr2.hide();
         });
         new Sortable(colorForms, {
             animation: 150,
         });
+    },
+    setColor(type, color){
+        if (type === 'base') {
+            this._private.pickr1.setColor(color);
+            _private.styleSheet.textContent = `:root { --base-color: ${color}; }`;
+        } else if (type === 'variation') {
+            this._private.pickr2.setColor(color);
+        }
+    },
+    // 선택된 색상 삭제
+    deleteColor(el) {
+        const colorDiv = el.closest('.f-color');
+        if (colorDiv) {
+            colorDiv.remove();
+        }
     },
     searchIcons(searchTerm){
         if (_repository.icons.length === 0) return;
@@ -193,44 +224,43 @@ const form_main = {
             });
         }
     },
-    changeVersion(delta) {
-        const input = document.getElementById('projectVersion');
-        let [major, minor, patch] = parseVersion(input.value || "1.0.0");
-        patch += delta;
+    changeVersion(type, delta) {
+        const majorEl = document.getElementById('versionMajor');
+        const minorEl = document.getElementById('versionMinor');
+        const patchEl = document.getElementById('versionPatch');
+        let major = Number(majorEl.value);
+        let minor = Number(minorEl.value);
+        let patch = Number(patchEl.value);
 
-        // 패치가 10 이상이면 마이너 증가, 패치 0으로
-        while (patch >= 10) {
-            patch -= 10;
-            minor += 1;
+        if (type == 'major') {
+            major += delta;
+            if (major < 0) {
+                major = 0;
+                minor = 0;
+                patch = 0;
+            }
+        } else if (type == 'minor') {
+            minor += delta;
+            if (minor < 0) {
+                minor = 0;
+                patch = 0;
+            } else if (minor >= 10) {
+                minor = 0;
+                major += 1;
+            }
+        } else if (type == 'patch') {
+            patch += delta;
+            if (patch < 0) {
+                patch = 0;
+            } else if (patch >= 10) {
+                patch = 0;
+                minor += 1;
+            }
         }
-
-        // 패치가 0 미만이면 마이너 감소, 패치 9로
-        while (patch < 0 && minor > 0) {
-            patch += 10;
-            minor -= 1;
-        }
-
-        // 마이너가 10 이상이면 메이저 증가, 마이너 0으로
-        while (minor >= 10) {
-            minor -= 10;
-            major += 1;
-        }
-
-        // 마이너가 0 미만이면 메이저 감소, 마이너 9로
-        while (minor < 0 && major > 0) {
-            minor += 10;
-            major -= 1;
-        }
-
-        input.value = formatVersion([major, minor, patch]);
-    },
-    parseVersion(ver) {
-        let parts = ver.split('.').map(Number);
-        while (parts.length < 3) parts.push(0);
-        return parts;
-    }, 
-    formatVersion(parts) {
-        return parts.join('.');
+        
+        majorEl.value = major;
+        minorEl.value = minor;
+        patchEl.value = patch;
     }
 }
 
@@ -401,7 +431,7 @@ const edit_main = {
         // 데이터 채우기
         preview.innerHTML = icon.data;
         iconNameTxt.innerHTML = icon.name;
-        iconCode.innerHTML = icon.code;
+        iconCode.innerHTML = icon.code || "";
         iconTag.innerText = `<i class="${cls}" aria-hidden="true"></i>`;
         iconCss.innerHTML = `.${cls}`;
         iconVariable.innerHTML = `var(--i-${fontPrefix}${icon.name})`;

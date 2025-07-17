@@ -56,7 +56,8 @@ module.exports = function(){
                     data: svgData.trim(),
                     sizes: sizes,
                     category: [],
-                    updated: new Date().toISOString().replace('T', ' ').substring(0, 19)
+                    updated: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                    isClone: false, // 클론 여부
                 });
             } catch (fileErr) {
                 console.error(`Error reading SVG file ${svgFile}:`, fileErr);
@@ -110,7 +111,8 @@ module.exports = function(){
                 data: svgData.trim(),
                 sizes: "32x32", // 기본값, 필요시 수정 가능
                 category: [],
-                updated: new Date().toISOString().replace('T', ' ').substring(0, 19)
+                updated: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                isClone: false, // 클론 여부
             }
             return { path: svgFilePath, data: fileInfo };
         } catch (err) {

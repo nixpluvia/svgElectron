@@ -725,9 +725,9 @@ select.f-control:focus {border-color: var(--color-primary); outline: 1px solid r
 [class*="f-switch"] {display: block; position: relative; cursor: pointer; user-select: none;}
 [class*="f-switch"] > input[type="checkbox"] {position: absolute; overflow: hidden; width: 1px; height: 1px; margin: -1px; clip: rect(0 0 0 0);}
 [class*="f-switch"] > span,
-[class*="f-switch"] > label {display: flex; position: relative; height: 2rem; line-height: 2rem; font-weight: inherit; font-size: 1.5rem; color: #000; align-items: center;}
+[class*="f-switch"] > label {display: flex; position: relative; height: 2rem; line-height: 2rem; font-weight: inherit; font-size: 1.5rem; color: #000; align-items: center; justify-content: space-between; gap: 0.8rem;}
 [class*="f-switch"]:not([class*="switch-right"]) > span::before,
-[class*="f-switch"]:not([class*="switch-right"]) > label::before {content:""; display: block; width: 3.4rem; height: 2rem; margin-right: 0.8rem; border: 1px solid var(--color-gray-40); border-radius: 4rem; background-color: #ffffff;}
+[class*="f-switch"]:not([class*="switch-right"]) > label::before {content:""; display: block; width: 3.4rem; height: 2rem; border: 1px solid var(--color-gray-40); border-radius: 4rem; background-color: #ffffff;}
 [class*="f-switch"]:not([class*="switch-right"]) > span::after,
 [class*="f-switch"]:not([class*="switch-right"]) > label::after {content: ""; position: absolute; top: calc(50% - 0.7rem); left: 0.3rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background-color: var(--color-gray-40); box-shadow: 0 0 .4rem 0 rgba(0,0,0,0.2);}
 
@@ -737,13 +737,11 @@ select.f-control:focus {border-color: var(--color-primary); outline: 1px solid r
 [class*="f-switch-right"] > span::before,
 [class*="f-switch-right"] > label::before {content: ""; position: absolute; top: calc(50% - 0.7rem); right: 0.3rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background-color: var(--color-gray-40); transform: translateX(-1.4rem); box-shadow: 0 0 .4rem 0 rgba(0,0,0,0.2);}
 [class*="f-switch-right"] > span::after,
-[class*="f-switch-right"] > label::after {content:""; display: block; width: 3.4rem; height: 2rem; margin-left: auto; border: 1px solid var(--color-gray-40); border-radius: 4rem; background-color: #ffffff;}
+[class*="f-switch-right"] > label::after {content:""; display: block; width: 3.4rem; height: 2rem; border: 1px solid var(--color-gray-40); border-radius: 4rem; background-color: #ffffff;}
 
 /* 인라인 */
 .f-switch-inline,
 .f-switch-right-inline {display: inline-block; vertical-align: middle;}
-.f-switch-right-inline > span::after,
-.f-switch-right-inline > label::after {margin-left: 0.8rem;}
 
 /*-------------------------------------------------------------------
 	@interaction

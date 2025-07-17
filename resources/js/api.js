@@ -1,216 +1,3 @@
-async function selectFolder() {
-    const folderData = await window.electronAPI.selectFolder();
-    if (folderData === null || folderData === undefined) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '취소되었습니다.',
-            type : 'mini'
-        });
-        return;
-    };
-    _private.optimizedIcons = [];
-    const iconCards = document.getElementById('iconCards');
-
-    // 아이콘 카드 렌더링
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(folderData.data));
-
-    // _repository에 데이터 채우기
-    _repository.path = folderData.path;
-    _repository.icons = folderData.data;
-
-    // svg 최적화
-    optimizeSVG();
-}
-async function modalSelectAddIcons(type){
-    try {
-        if (type === 'folder') {
-            const api = await selectAddFolder();
-            if (api === false) return;
-        } else if (type === 'svg') {
-            const api = await selectAddSvg();
-            if (api === false) return;
-        } else if (type === 'code') {
-            const api = selectAddCode();
-            if (api === false) return;
-        }
-    } catch (error) {
-        console.error(error);
-        return;
-    }
-    // svg 최적화
-    optimizeSVG();
-    modal.close('#svgAddModal');
-    ueye.toast.action({
-        status: 'success',
-        message: '아이콘이 추가되었습니다.',
-        type : 'mini'
-    });
-}
-// SVG Code 추가 메서드
-function selectAddCode(){
-    let svgNameEl = document.querySelector('#svgAddName');
-    let svgCodeEl = document.querySelector('#svgAddCode');
-    let svgName = svgNameEl.value;
-    let svgCode = svgCodeEl.value;
-    svgCode = svgCode.trim();
-    if (svgCode === '') {
-        alert('SVG 코드를 입력해주세요.');
-        return false;
-    }
-
-    // SVG 형식 확인
-    let parser = new DOMParser();
-    let doc = parser.parseFromString(svgCode, "image/svg+xml");
-    let isSvg = doc.documentElement && doc.documentElement.nodeName.toLowerCase() === 'svg';
-    let parseError = doc.querySelector('parsererror');
-    if (!isSvg || parseError) {
-        alert('유효한 SVG 코드가 아닙니다.');
-        return false;
-    }
-
-    let svgData = {
-        name: svgName || 'new-icon',
-        data: svgCode,
-        sizes: "32x32", // 기본값, 필요시 수정 가능
-        category: [],
-        updated: new Date().toISOString().replace('T', ' ').substring(0, 19)
-    };
-    const iconCards = document.getElementById('iconCards');
-
-    // 아이콘 카드 렌더링
-    iconCards.appendChild(renderCard(svgData));
-    // _repository에 데이터 채우기
-    _repository.icons.push(svgData);
-
-    // 폼 필드 초기화
-    svgNameEl.value = '';
-    svgCodeEl.value = '';
-}
-// 폴더 선택 메서드
-async function selectAddFolder() {
-    const folderData = await window.electronAPI.selectFolder();
-    if (folderData === null || folderData === undefined) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '취소되었습니다.',
-            type : 'mini'
-        });
-        return false;
-    };
-    const iconCards = document.getElementById('iconCards');
-
-    // 아이콘 카드 렌더링
-    iconCards.appendChild(renderCard(folderData.data));
-
-    // _repository에 데이터 채우기
-    _repository.icons.push(...folderData.data);
-}
-// SVG 파일 선택 메서드
-async function selectAddSvg() {
-    const fileData = await window.electronAPI.selectSvg();
-    if (fileData === null || fileData === undefined) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '취소되었습니다.',
-            type : 'mini'
-        });
-        return false;
-    };
-    const iconCards = document.getElementById('iconCards');
-
-    // 아이콘 카드 렌더링
-    iconCards.appendChild(renderCard(fileData.data));
-    // _repository에 데이터 채우기
-    _repository.icons.push({...fileData.data});
-}
-// JSON 파일 선택 메서드
-async function selectJson() {
-    const folderData = await window.electronAPI.selectJson();
-    if (folderData === null || folderData === undefined) {
-        ueye.toast.action({
-            status: 'warning',
-            message: '취소되었습니다.',
-            type : 'mini'
-        });
-        return;
-    };
-    const svgInfo = folderData.data;
-
-    // 아이콘 카드 렌더링
-    const iconCards = document.getElementById('iconCards');
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(svgInfo.icons));
-
-    // _repository에 데이터 채우기
-    _repository.path = folderData.path;
-    _repository.title = svgInfo.title || 'svg-electron';
-    _repository.version = svgInfo.version || '1.0.0';
-    _repository.description = svgInfo.description || 'SVG Font Generator using Electron';
-    _repository.icons = svgInfo.icons || null;
-
-    // 폼 필드에 데이터 채우기
-    document.getElementById('projectTitle').value = svgInfo.title || 'SVG Project';
-    document.getElementById('projectDescription').value = svgInfo.description || 'A project using SVG icons';
-    document.getElementById('projectVersion').value = svgInfo.version || '1.0.0';
-    document.getElementById('fontPrefix').value = svgInfo.fontPrefix || '';
-
-    // colorSet이 있다면 색상 폼에 추가
-    const colorForms = document.querySelector('#colorForms');
-    colorForms.innerHTML = ''; // 기존 폼 초기화
-    if (svgInfo.colorSet && svgInfo.colorSet.length > 0) {
-        svgInfo.colorSet.forEach(d => {
-            const colorHex = d.color || '#000000';
-            const html = `
-                <div class="f-color">
-                    <span style="background-color: ${colorHex};"></span>
-                    <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" value="${d.suffix || ''}" placeholder="접미사(suffix)">
-                    <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="layout_main.deleteColor(this)"><i class="i-close"></i></button>
-                </div>
-            `;
-            colorForms.insertAdjacentHTML('beforeend', html);
-        });
-    }
-}
-
-/**
- * 아이콘 카드 렌더링 함수
- * @param {Array} data 
- * @returns 
- */
-function renderCard(data) {
-    const fragment = document.createDocumentFragment();
-    if (data === null || data === undefined) return fragment;
-    if (!Array.isArray(data)) {
-        createCard(data);
-    } else {
-        data.forEach(createCard);
-    }
-
-    function createCard (icon) {
-        const col = document.createElement('div');
-        col.className = 'item';
-        col.innerHTML = `
-            <div class="icon-card" data-icon-name="${icon.name}">
-                <div class="ck">
-                    <label class="f-check only">
-                        <input type="checkbox" name="iconSelect" value="${icon.name}" aria-label="...">
-                        <span></span>
-                    </label>
-                </div>
-                <div class="content">
-                    ${icon.data}
-                    <button type="button" class="btn-copy" onclick="edit_main.showEditModal('${icon.name}')"><span class="blind">COPY</span></button>
-                </div>
-                <button type="button" class="btn-title" onclick="copyCode('data', '${icon.name}')"><strong class="tit-xs">${icon.name || '이름없음'}</strong></button>
-                <button type="button" class="btn-del" onclick="card_main.deleteIcon(this, '${icon.name}')"><i class="i-delete"></i><span class="blind">삭제</span></button>
-            </div>
-        `
-        fragment.appendChild(col);
-    }
-    return fragment;
-}
-
 /**
  * SVG 최적화 함수
  */
@@ -306,79 +93,336 @@ function optimize(svg){
     return svgTag;
 }
 
-
-/**
- * 선택된 SVG 데이터를 전송하는 함수
- */
-function sendSvgData() {
-    const icons = [];
-    document.querySelectorAll('input[name="iconSelect"]:checked').forEach(checkbox => {
-        const iconName = checkbox.value;
-        const iconData = _repository.icons.find(icon => icon.name === iconName);
-        if (iconData) {
-            icons.push(iconData);
+// 아이콘 편집 API
+const select_util = {
+    // 폴더 선택 메서드
+    async selectFolder() {
+        const folderData = await window.electronAPI.selectFolder();
+        if (folderData === null || folderData === undefined) {
+            ueye.toast.action({
+                status: 'warning',
+                message: '취소되었습니다.',
+                type : 'mini'
+            });
+            return;
+        };
+        _private.optimizedIcons = [];
+        const iconCards = document.getElementById('iconCards');
+    
+        // 아이콘 카드 렌더링
+        iconCards.innerHTML = '';
+        iconCards.appendChild(renderCard(folderData.data));
+    
+        // _repository에 데이터 채우기
+        _repository.path = folderData.path;
+        _repository.icons = folderData.data;
+    
+        // svg 최적화
+        optimizeSVG();
+    },
+    // JSON 파일 선택 메서드
+    async selectJson() {
+        const folderData = await window.electronAPI.selectJson();
+        if (folderData === null || folderData === undefined) {
+            ueye.toast.action({
+                status: 'warning',
+                message: '취소되었습니다.',
+                type : 'mini'
+            });
+            return;
+        };
+        const svgInfo = folderData.data;
+        const iconFilter = svgInfo.icons.filter(icon => icon.isClone === undefined || icon.isClone === false);
+        svgInfo.icons = iconFilter;
+    
+        // 아이콘 카드 렌더링
+        const iconCards = document.getElementById('iconCards');
+        iconCards.innerHTML = '';
+        iconCards.appendChild(renderCard(svgInfo.icons));
+    
+        // _repository에 데이터 채우기
+        _repository.path = folderData.path;
+        _repository.title = svgInfo.title || 'svg-electron';
+        _repository.version = svgInfo.version || '1.0.0';
+        _repository.description = svgInfo.description || 'SVG Font Generator using Electron';
+        _repository.icons = svgInfo.icons || null;
+    
+        // 폼 필드에 데이터 채우기
+        document.getElementById('projectTitle').value = svgInfo.title || 'SVG Project';
+        document.getElementById('projectDescription').value = svgInfo.description || 'A project using SVG icons';
+        svgInfo.version.split('.').forEach((v, i) => {
+            if (i === 0) {
+                document.getElementById('versionMajor').value = v || '1';
+            } else if (i === 1) {
+                document.getElementById('versionMinor').value = v || '0';
+            } else if (i === 2) {
+                document.getElementById('versionPatch').value = v || '0';
+            }
+        });
+        document.getElementById('fontPrefix').value = svgInfo.fontPrefix || '';
+        document.getElementById('baseColor').value = svgInfo.baseColor || '#000000';
+        form_main.setColor('base', svgInfo.baseColor || '#000000');
+        // colorSet이 있다면 색상 폼에 추가
+        const colorForms = document.querySelector('#colorForms');
+        colorForms.innerHTML = ''; // 기존 폼 초기화
+        if (svgInfo.colorSet && svgInfo.colorSet.length > 0) {
+            svgInfo.colorSet.forEach(d => {
+                const colorHex = d.color || '#000000';
+                const html = `
+                    <div class="f-color">
+                        <span style="background-color: ${colorHex};"></span>
+                        <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" value="${d.suffix || ''}" placeholder="접미사(suffix)">
+                        <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="layout_main.deleteColor(this)"><i class="i-close"></i></button>
+                    </div>
+                `;
+                colorForms.insertAdjacentHTML('beforeend', html);
+            });
         }
-    });
-    if (icons.length === 0) {
+    },
+}
+
+// 아이콘 편집 API
+const edit_api = {
+    async modalSelectAddIcons(type){
+        try {
+            if (type === 'folder') {
+                const api = await this.addFolder();
+                if (api === false) return;
+            } else if (type === 'svg') {
+                const api = await this.addSvg();
+                if (api === false) return;
+            } else if (type === 'code') {
+                const api = this.addCode();
+                if (api === false) return;
+            }
+        } catch (error) {
+            console.error(error);
+            return;
+        }
+        // svg 최적화
+        optimizeSVG();
+        modal.close('#svgAddModal');
         ueye.toast.action({
-            status: 'warning',
-            message: '선택된 아이콘이 없습니다.',
+            status: 'success',
+            message: '아이콘이 추가되었습니다.',
             type : 'mini'
         });
-        console.warn('No icons selected for font generation.');
-        return false;
-    }
-
-    const projectTitle = document.getElementById('projectTitle').value || 'SVG Project';
-    const projectDescription = document.getElementById('projectDescription').value || 'A project using SVG icons';
-    const projectVersion = document.getElementById('projectVersion').value || '1.0.0';
-    const fontPrefix = document.getElementById('fontPrefix').value || '';
-    document.querySelectorAll('input[name="colorSet"]').forEach(el => {
-        const suffix = el.value.trim();
-        const color = el.dataset.color || '#000000';
-        if (suffix !== '') {
-            _repository.colorSet.push({ suffix, color });
+    },
+    // SVG Code 추가 메서드
+    addCode(){
+        let svgNameEl = document.querySelector('#svgAddName');
+        let svgCodeEl = document.querySelector('#svgAddCode');
+        let svgName = svgNameEl.value;
+        let svgCode = svgCodeEl.value;
+        svgCode = svgCode.trim();
+        if (svgCode === '') {
+            alert('SVG 코드를 입력해주세요.');
+            return false;
         }
-    });
-
-    ueye.loading.show();
-    const data = {
-        projectInfo : {
-            title : projectTitle,
-            description : projectDescription,
-            version : projectVersion,
-            fontPrefix : fontPrefix,
-            colorSet : _repository.colorSet || []
-        },
-        icons : icons
-    }
-    return data;
+    
+        // SVG 형식 확인
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(svgCode, "image/svg+xml");
+        let isSvg = doc.documentElement && doc.documentElement.nodeName.toLowerCase() === 'svg';
+        let parseError = doc.querySelector('parsererror');
+        if (!isSvg || parseError) {
+            alert('유효한 SVG 코드가 아닙니다.');
+            return false;
+        }
+    
+        let svgData = {
+            name: svgName || 'new-icon',
+            data: svgCode,
+            sizes: "32x32", // 기본값, 필요시 수정 가능
+            category: [],
+            updated: new Date().toISOString().replace('T', ' ').substring(0, 19),
+            isClone: false,
+        };
+        const iconCards = document.getElementById('iconCards');
+    
+        // 아이콘 카드 렌더링
+        iconCards.appendChild(renderCard(svgData));
+        // _repository에 데이터 채우기
+        _repository.icons.push(svgData);
+    
+        // 폼 필드 초기화
+        svgNameEl.value = '';
+        svgCodeEl.value = '';
+    },
+    // 폴더 선택 메서드
+    async addFolder() {
+        const folderData = await window.electronAPI.selectFolder();
+        if (folderData === null || folderData === undefined) {
+            ueye.toast.action({
+                status: 'warning',
+                message: '취소되었습니다.',
+                type : 'mini'
+            });
+            return false;
+        };
+        const iconCards = document.getElementById('iconCards');
+    
+        // 아이콘 카드 렌더링
+        iconCards.appendChild(renderCard(folderData.data));
+    
+        // _repository에 데이터 채우기
+        _repository.icons.push(...folderData.data);
+    },
+    // SVG 파일 선택 메서드
+    async addSvg() {
+        const fileData = await window.electronAPI.selectSvg();
+        if (fileData === null || fileData === undefined) {
+            ueye.toast.action({
+                status: 'warning',
+                message: '취소되었습니다.',
+                type : 'mini'
+            });
+            return false;
+        };
+        const iconCards = document.getElementById('iconCards');
+    
+        // 아이콘 카드 렌더링
+        iconCards.appendChild(renderCard(fileData.data));
+        // _repository에 데이터 채우기
+        _repository.icons.push({...fileData.data});
+    },
 }
 
-function requestGenerate(type){
-    const data = sendSvgData();
-    if (data === false || type === undefined) return;
+/**
+ * 아이콘 카드 렌더링 함수
+ * @param {Array} data 
+ * @returns 
+ */
+function renderCard(data) {
+    const fragment = document.createDocumentFragment();
+    if (data === null || data === undefined) return fragment;
+    if (!Array.isArray(data)) {
+        createCard(data);
+    } else {
+        data.forEach(createCard);
+    }
+
+    function createCard (icon) {
+        const col = document.createElement('div');
+        col.className = 'item';
+        icon.data = icon.data.replace(/fill="[^"]*"/g, 'fill="currentColor"')
+        col.innerHTML = `
+            <div class="icon-card" data-icon-name="${icon.name}">
+                <div class="ck">
+                    <label class="f-check only">
+                        <input type="checkbox" name="iconSelect" value="${icon.name}" aria-label="...">
+                        <span></span>
+                    </label>
+                </div>
+                <div class="content">
+                    ${icon.data}
+                    <button type="button" class="btn-copy" onclick="edit_main.showEditModal('${icon.name}')"><span class="blind">COPY</span></button>
+                </div>
+                <button type="button" class="btn-title" onclick="copyCode('data', '${icon.name}')"><strong class="tit-xs">${icon.name || '이름없음'}</strong></button>
+                <button type="button" class="btn-del" onclick="card_main.deleteIcon(this, '${icon.name}')"><i class="i-delete"></i><span class="blind">삭제</span></button>
+            </div>
+        `
+        fragment.appendChild(col);
+    }
+    return fragment;
+}
+
+
+const generater = {
+    /**
+     * 선택된 SVG 데이터를 전송하는 함수
+     */
+    sendSvgData() {
+        const icons = [];
+        document.querySelectorAll('input[name="iconSelect"]:checked').forEach(checkbox => {
+            const iconName = checkbox.value;
+            const iconData = _repository.icons.find(icon => icon.name === iconName);
+            if (iconData) {
+                icons.push(iconData);
+            }
+        });
+        if (icons.length === 0) {
+            ueye.toast.action({
+                status: 'warning',
+                message: '선택된 아이콘이 없습니다.',
+                type : 'mini'
+            });
+            console.warn('No icons selected for font generation.');
+            return false;
+        }
     
-    if (type === 'all') {
-        if (confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?')) {
-            window.electronAPI.generateAll(data);
+        const projectTitle = document.getElementById('projectTitle').value || 'SVG Project';
+        const projectDescription = document.getElementById('projectDescription').value || 'A project using SVG icons';
+        const major = document.getElementById('versionMajor').value;
+        const minor = document.getElementById('versionMinor').value;
+        const patch = document.getElementById('versionPatch').value;
+        const projectVersion = `${major}.${minor}.${patch}`;
+        let fontPrefix = '';
+        if (document.getElementById('useFontPrefix').checked) {
+            fontPrefix = document.getElementById('fontPrefix').value || '';
         }
-    } else if (type === 'variable') {
-        window.electronAPI.generateVariable(data);
-    } else if (type === 'font') {
-        if (confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?')) {
-            window.electronAPI.generateFont(data);
+        let baseColor = '#000000';
+        if (document.getElementById('useBaseColor').checked) {
+            baseColor = document.getElementById('baseColor').value || '#000000';
         }
-    } else if (type === 'sprite') {
-        if (_repository.colorSet.length > 0) {
-            if (confirm('Color Set을 사용할 경우 Path로 구성된 SVG만 색상 변경 생성이 가능합니다.\n\n계속하시겠습니까?')) {
+        _repository.colorSet = [];
+        if (document.getElementById('useColorSet').checked) {
+            document.querySelectorAll('input[name="colorSet"]').forEach(el => {
+                const suffix = el.value.trim();
+                const color = el.dataset.color || '#000000';
+                if (suffix !== '') {
+                    _repository.colorSet.push({ suffix, color });
+                }
+            });
+        }
+        
+        const data = {
+            projectInfo : {
+                title : projectTitle,
+                description : projectDescription,
+                version : projectVersion,
+                fontPrefix : fontPrefix,
+                baseColor : baseColor,
+                colorSet : _repository.colorSet
+            },
+            icons : icons
+        }
+        return data;
+    },
+    request(type){
+        const data = this.sendSvgData();
+        if (data === false || type === undefined) return;
+        
+        if (type === 'all') {
+            const result = confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?');
+            if (result) {
+                ueye.loading.show();
+                window.electronAPI.generateAll(data);
+            }
+        } else if (type === 'variable') {
+            ueye.loading.show();
+            window.electronAPI.generateVariable(data);
+        } else if (type === 'font') {
+            const result = confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?');
+            if (result) {
+                ueye.loading.show();
+                window.electronAPI.generateFont(data);
+            }
+        } else if (type === 'sprite') {
+            if (_repository.colorSet.length > 0) {
+                const result = confirm('Color Set을 사용할 경우 Path로 구성된 SVG만 색상 변경 생성이 가능합니다.\n\n계속하시겠습니까?');
+                if (result) {
+                    ueye.loading.show();
+                    window.electronAPI.generateSprite(data);
+                }
+            } else {
                 window.electronAPI.generateSprite(data);
             }
-        } else {
-            window.electronAPI.generateSprite(data);
         }
     }
 }
+
+
 
 
 
