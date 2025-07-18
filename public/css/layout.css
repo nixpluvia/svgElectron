@@ -144,7 +144,7 @@ body.open-mobile {overflow: hidden; height: 100%;}
 .icon-modal .modal-con .btn-close {position: absolute; top: var(--r-08); right: var(--r-20);}
 
 .icon-editor {display: flex;}
-.icon-editor .preview {display: block; width: 10rem; margin-bottom: auto; border: 1px solid var(--color-gray-30); flex-shrink: 0; aspect-ratio: 1 / 1;}
+.icon-editor .preview {display: block; width: 10rem; margin-bottom: auto; border: 1px solid var(--color-gray-30); color: var(--base-color); flex-shrink: 0; aspect-ratio: 1 / 1;}
 .icon-editor .preview svg {display: block; margin: auto; max-width: 100%; max-height: 100%;}
 
 .icon-editor .info {display: block; flex-grow: 1; padding-left: var(--r-20);}

@@ -1,4 +1,5 @@
 const { ipcMain, dialog } = require('electron');
+const isDev = require("electron-is-dev");
 const path = require('path');
 const fs = require("fs");
 const fsp = require('fs').promises;
@@ -123,7 +124,9 @@ module.exports = function(){
 
     // Markdown 파일 로드 요청 수신
     ipcMain.handle('load-md', async (_, filePath) => {
-        const absPath = path.resolve(__dirname, '..', filePath)
+        const absPath = isDev
+        ? path.resolve(__dirname, '../data', filePath)
+        : path.resolve(__dirname, 'public', 'data', filePath);
         const mdContent = fs.readFileSync(absPath, 'utf8')
         return marked.parse(mdContent)
     })

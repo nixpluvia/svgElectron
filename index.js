@@ -21,7 +21,7 @@ function createWindow() {
   win.center(); // 화면 중앙에 위치
 
   // index.html 로드
-  win.loadFile('index.html');
+  win.loadFile('./public/html/index.html');
 
   const menuTemplate = [
     {

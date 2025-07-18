@@ -1,4 +1,6 @@
 const { ipcMain, dialog } = require("electron");
+const isDev = require("electron-is-dev");
+const log = require('electron-log');
 const path = require("path");
 const { SVGIcons2SVGFontStream } = require("svgicons2svgfont");
 const { optimize } = require("svgo");
@@ -37,6 +39,7 @@ module.exports = function () {
 	 * @returns
 	 */
 	async function generateFont({ data, folderPath }) {
+		const projectTitle = data.projectInfo.title || "sim";
 		return new Promise((resolve, reject) => {
 			const fontStream = new SVGIcons2SVGFontStream({
 				fontName: projectTitle,
@@ -45,6 +48,7 @@ module.exports = function () {
 				descent: 0,
 				centerHorizontally: true,
 			});
+			log.info(`Generating font for project: ${fontStream}`);
 
 			const svgFontPath = path.join(folderPath, projectTitle + ".svg");
 			const ttfFontPath = path.join(folderPath, projectTitle + ".ttf");
@@ -64,6 +68,7 @@ module.exports = function () {
 
 			// 에러 처리
 			fontStream.on("error", (err) => {
+				log.error(err);
 				reject(err);
 			});
 
@@ -131,7 +136,9 @@ module.exports = function () {
 				}
 			}
 		}
-		const cssPath = path.join(__dirname, '../prototype.css');
+		const cssPath = isDev
+		? path.join(__dirname, '../data/prototype.css')
+		: path.join(__dirname, 'public', 'data', 'prototype.css');
 		const copyPath = path.join(folderPath, projectTitle + ".css");
 		let cssData = fs.readFileSync(cssPath, "utf8");
 		if (fontPrefix !== '') {
@@ -180,18 +187,18 @@ module.exports = function () {
 		const folderPath = paramPath || await selectFolder();
 		if (!folderPath) return null;
 
-		let iconsData = data.icons;
+		const iconsData = data.icons;
 		if (!Array.isArray(iconsData) || iconsData.length === 0) {
 			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
 			return null;
 		}
 
 		const colorSet = data.projectInfo.colorSet;
+		const newIconsData = [];
 		if (colorSet && colorSet.length > 0) {
-			let newIcons = [];
 			for (const icon of iconsData) {
 				icon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${data.projectInfo.baseColor}"`); // 기본 색상으로 변경
-				newIcons.push(icon); // 원본 아이콘 추가
+				newIconsData.push(icon); // 원본 아이콘 추가
 				// 색상 세트에 따라 클론 아이콘 생성
 				for (const d of colorSet) {
 					const clonedIcon = { ...icon };
@@ -199,18 +206,16 @@ module.exports = function () {
 					clonedIcon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${d.color}"`);
 					clonedIcon.code = "";
 					clonedIcon.isClone = true;
-					newIcons.push(clonedIcon);
+					newIconsData.push(clonedIcon);
 				}
 			}
-			data.icons = newIcons;
-			iconsData = data.icons;
 		}
 
 		const fontPrefix = data.projectInfo.fontPrefix || '';
 		const projectTitle = data.projectInfo.title || "sim";
 		let newCss = ":root {\n";
 		const prefix = fontPrefix !== '' ? `--i-${fontPrefix}-` : '--i-';
-		for (const icon of iconsData) {
+		for (const icon of newIconsData) {
 			if (icon.data && icon.data.trim() !== "") {
 				try {
 					// 최적화
@@ -293,17 +298,18 @@ module.exports = function () {
 		const folderPath = paramPath || await selectFolder(); // svg 아이콘 목록 경로
 		if (!folderPath) return null;
 		
-		let iconsData = data.icons;
+		const iconsData = data.icons;
 		if (!Array.isArray(iconsData) || iconsData.length === 0) {
 			console.error("아이콘 데이터가 비어있거나 잘못된 형식입니다.");
 			return null;
 		}
+		const projectTitle = data.projectInfo.title;
 		const colorSet = data.projectInfo.colorSet;
+		const newIconsData = [];
 		if (colorSet && colorSet.length > 0) {
-			let newIcons = [];
 			for (const icon of iconsData) {
 				icon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${data.projectInfo.baseColor}"`); // 기본 색상으로 변경
-				newIcons.push(icon); // 원본 아이콘 추가
+				newIconsData.push(icon); // 원본 아이콘 추가
 				// 색상 세트에 따라 클론 아이콘 생성
 				for (const d of colorSet) {
 					const clonedIcon = { ...icon };
@@ -311,11 +317,9 @@ module.exports = function () {
 					clonedIcon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${d.color}"`);
 					clonedIcon.code = "";
 					clonedIcon.isClone = true;
-					newIcons.push(clonedIcon);
+					newIconsData.push(clonedIcon);
 				}
 			}
-			data.icons = newIcons;
-			iconsData = data.icons;
 		}
 
 		const newFolderPath = path.join(folderPath, "sprite");
@@ -323,10 +327,12 @@ module.exports = function () {
 			fs.mkdirSync(newFolderPath, { recursive: true });
 		}
 		spriteConfig.mode.css.dest = newFolderPath; // 결과 파일 저장 폴더
+		spriteConfig.mode.css.sprite = projectTitle + "Sprite.svg"; // 스프라이트 SVG 파일명
 		spriteConfig.mode.stack.dest = newFolderPath; // 결과 파일 저장 폴더
+		spriteConfig.mode.stack.sprite = projectTitle + "Stack.svg"; // 스택 SVG 파일명
 		const sprite = new Sprite(spriteConfig);
 		const fakePath = '/virtual/path/';
-		for (const icon of iconsData) {
+		for (const icon of newIconsData) {
 			if (icon.data && icon.data.trim() !== "") {
 				try {
 					sprite.add(fakePath + icon.name + ".svg", icon.name + ".svg", icon.data);

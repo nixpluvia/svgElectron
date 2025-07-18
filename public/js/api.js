@@ -99,10 +99,9 @@ const select_util = {
     async selectFolder() {
         const folderData = await window.electronAPI.selectFolder();
         if (folderData === null || folderData === undefined) {
-            ueye.toast.action({
-                status: 'warning',
-                message: '취소되었습니다.',
-                type : 'mini'
+            Swal.fire({
+                title: '취소되었습니다.',
+                icon: "warning",
             });
             return;
         };
@@ -124,10 +123,9 @@ const select_util = {
     async selectJson() {
         const folderData = await window.electronAPI.selectJson();
         if (folderData === null || folderData === undefined) {
-            ueye.toast.action({
-                status: 'warning',
-                message: '취소되었습니다.',
-                type : 'mini'
+            Swal.fire({
+                title: '취소되었습니다.',
+                icon: "warning",
             });
             return;
         };
@@ -159,13 +157,23 @@ const select_util = {
                 document.getElementById('versionPatch').value = v || '0';
             }
         });
-        document.getElementById('fontPrefix').value = svgInfo.fontPrefix || '';
-        document.getElementById('baseColor').value = svgInfo.baseColor || '#000000';
-        form_main.setColor('base', svgInfo.baseColor || '#000000');
+
+        // fontPrefix가 있다면 폰트 접두사 폼에 추가
+        if (svgInfo.fontPrefix && svgInfo.fontPrefix !== '') {
+            document.getElementById('useFontPrefix').checked = true;
+            document.getElementById('fontPrefix').value = svgInfo.fontPrefix;
+        }
+        // baseColor가 있다면 색상 폼에 추가
+        if (svgInfo.baseColor && svgInfo.baseColor !== '' && svgInfo.baseColor !== '#000000') {
+            document.getElementById('useBaseColor').checked = true;
+            document.getElementById('baseColor').value = svgInfo.baseColor;
+            form_main.setColor('base', svgInfo.baseColor);
+        }
         // colorSet이 있다면 색상 폼에 추가
         const colorForms = document.querySelector('#colorForms');
         colorForms.innerHTML = ''; // 기존 폼 초기화
         if (svgInfo.colorSet && svgInfo.colorSet.length > 0) {
+            document.getElementById('useColorSet').checked = true;
             svgInfo.colorSet.forEach(d => {
                 const colorHex = d.color || '#000000';
                 const html = `
@@ -253,10 +261,9 @@ const edit_api = {
     async addFolder() {
         const folderData = await window.electronAPI.selectFolder();
         if (folderData === null || folderData === undefined) {
-            ueye.toast.action({
-                status: 'warning',
-                message: '취소되었습니다.',
-                type : 'mini'
+            Swal.fire({
+                title: '취소되었습니다.',
+                icon: "warning",
             });
             return false;
         };
@@ -272,10 +279,9 @@ const edit_api = {
     async addSvg() {
         const fileData = await window.electronAPI.selectSvg();
         if (fileData === null || fileData === undefined) {
-            ueye.toast.action({
-                status: 'warning',
-                message: '취소되었습니다.',
-                type : 'mini'
+            Swal.fire({
+                title: '취소되었습니다.',
+                icon: "warning",
             });
             return false;
         };
@@ -342,10 +348,9 @@ const generater = {
             }
         });
         if (icons.length === 0) {
-            ueye.toast.action({
-                status: 'warning',
-                message: '선택된 아이콘이 없습니다.',
-                type : 'mini'
+            Swal.fire({
+                title: "선택된 아이콘이 없습니다.",
+                icon: "warning",
             });
             console.warn('No icons selected for font generation.');
             return false;
@@ -367,13 +372,25 @@ const generater = {
         }
         _repository.colorSet = [];
         if (document.getElementById('useColorSet').checked) {
-            document.querySelectorAll('input[name="colorSet"]').forEach(el => {
+            const colorSetInputs = document.querySelectorAll('input[name="colorSet"]');
+            for (const el of colorSetInputs) {
                 const suffix = el.value.trim();
                 const color = el.dataset.color || '#000000';
                 if (suffix !== '') {
                     _repository.colorSet.push({ suffix, color });
+                } else {
+                    Swal.fire({
+                        title: "접미사(suffix)가 비어있습니다.",
+                        icon: "warning",
+                        returnFocus :false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            el.focus();
+                        }
+                    });
+                    return false;
                 }
-            });
+            }
         }
         
         const data = {
@@ -394,23 +411,33 @@ const generater = {
         if (data === false || type === undefined) return;
         
         if (type === 'all') {
-            const result = confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?');
-            if (result) {
-                ueye.loading.show();
-                window.electronAPI.generateAll(data);
-            }
+            Swal.fire({
+                title: "SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n계속하시겠습니까?",
+                icon: "warning",
+                showCancelButton: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ueye.loading.show();
+                    window.electronAPI.generateAll(data);
+                }
+            });
         } else if (type === 'variable') {
             ueye.loading.show();
             window.electronAPI.generateVariable(data);
         } else if (type === 'font') {
-            const result = confirm('SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n\n계속하시겠습니까?');
-            if (result) {
-                ueye.loading.show();
-                window.electronAPI.generateFont(data);
-            }
+             Swal.fire({
+                title: "SVG가 Path로 구성되지 않은 경우에 정상적으로 생성되지 않을 수 있습니다.\n계속하시겠습니까?",
+                icon: "warning",
+                showCancelButton: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    ueye.loading.show();
+                    window.electronAPI.generateFont(data);
+                }
+            });
         } else if (type === 'sprite') {
             if (_repository.colorSet.length > 0) {
-                const result = confirm('Color Set을 사용할 경우 Path로 구성된 SVG만 색상 변경 생성이 가능합니다.\n\n계속하시겠습니까?');
+                const result = confirm('Color Set을 사용할 경우 Path로 구성된 SVG만 색상 변경 생성이 가능합니다.\n계속하시겠습니까?');
                 if (result) {
                     ueye.loading.show();
                     window.electronAPI.generateSprite(data);
@@ -425,7 +452,17 @@ const generater = {
 
 
 
-
+/**
+ * 프로젝트 업데이트 함수
+ * @param {*} arg 
+ */
+function updateProject(arg) {
+    const iconCards = document.getElementById('iconCards');
+    let svgInfo = arg.data;
+    svgInfo.icons = svgInfo.icons.filter(icon => icon.isClone === undefined || icon.isClone === false);
+    iconCards.innerHTML = '';
+    iconCards.appendChild(renderCard(svgInfo.icons));
+}
 
 /**
  * SVG 폰트 생성을 완료했을 때 호출되는 함수
@@ -433,18 +470,18 @@ const generater = {
 window.electronAPI.onGenerateFontDone((event, arg) => {
     if (typeof arg === 'string') {
         ueye.loading.hide();
-        ueye.toast.action({
-            status: 'warning',
-            message: arg,
-            type : 'mini'
+        Swal.fire({
+            title: arg,
+            icon: "warning",
         });
         return;
     }
-    const iconCards = document.getElementById('iconCards');
-    const svgInfo = arg.data;
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(svgInfo.icons));
+    updateProject(arg);
     ueye.loading.hide();
+    Swal.fire({
+        title: "생성 완료",
+        icon: "success",
+    });
 });
 /**
  * variable css 생성을 완료했을 때 호출되는 함수
@@ -452,14 +489,17 @@ window.electronAPI.onGenerateFontDone((event, arg) => {
 window.electronAPI.onGenerateVariableDone((event, arg) => {
     if (typeof arg === 'string' && arg !== 'success') {
         ueye.loading.hide();
-        ueye.toast.action({
-            status: 'warning',
-            message: arg,
-            type : 'mini'
+        Swal.fire({
+            title: arg,
+            icon: "warning",
         });
         return;
     }
     ueye.loading.hide();
+    Swal.fire({
+        title: "생성 완료",
+        icon: "success",
+    });
 });
 /**
  * sprite css 생성을 완료했을 때 호출되는 함수
@@ -467,14 +507,17 @@ window.electronAPI.onGenerateVariableDone((event, arg) => {
 window.electronAPI.onGenerateSpriteDone((event, arg) => {
     if (typeof arg === 'string' && arg !== 'success') {
         ueye.loading.hide();
-        ueye.toast.action({
-            status: 'warning',
-            message: arg,
-            type : 'mini'
+        Swal.fire({
+            title: arg,
+            icon: "warning",
         });
         return;
     }
     ueye.loading.hide();
+    Swal.fire({
+        title: "생성 완료",
+        icon: "success",
+    });
 });
 /**
  * sprite css 생성을 완료했을 때 호출되는 함수
@@ -482,16 +525,16 @@ window.electronAPI.onGenerateSpriteDone((event, arg) => {
 window.electronAPI.onGenerateAllDone((event, arg) => {
     if (typeof arg === 'string') {
         ueye.loading.hide();
-        ueye.toast.action({
-            status: 'warning',
-            message: arg,
-            type : 'mini'
+        Swal.fire({
+            title: arg,
+            icon: "warning",
         });
         return;
     }
-    const iconCards = document.getElementById('iconCards');
-    const svgInfo = arg.data;
-    iconCards.innerHTML = '';
-    iconCards.appendChild(renderCard(svgInfo.icons));
+    updateProject(arg);
     ueye.loading.hide();
+    Swal.fire({
+        title: "생성 완료",
+        icon: "success",
+    });
 });

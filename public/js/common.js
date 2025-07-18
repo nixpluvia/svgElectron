@@ -29,7 +29,7 @@ let isRenderedGuide = false;
 async function showGuideModal() {
     if (!isRenderedGuide) {
         try {
-            const guide = await window.electronAPI.loadMarkdown('resources/data/guide.md');
+            const guide = await window.electronAPI.loadMarkdown('guide.md');
             document.getElementById('guideContent').innerHTML = guide;
             isRenderedGuide = true;
         } catch (error) {
@@ -50,6 +50,8 @@ function copyCode(type, iconName) {
         targetElement = document.getElementById('modalIconVariable');
     } else if (type === 'code') {
         targetElement = document.getElementById('modalIconCode');
+    } else if (type === 'id') {
+        targetElement = document.getElementById('modalIconId');
     } else if (type === 'data') {
         if (iconName) {
             let fontPrefix = _repository.fontPrefix || document.getElementById('fontPrefix').value || '';
@@ -158,6 +160,7 @@ const form_main = {
         this._private.pickr1.on('save', (color, instance) => {
             const colorHex = color.toHEXA().toString();
             document.getElementById('baseColor').value = colorHex;
+            document.getElementById('useBaseColor').checked = true;
             _private.styleSheet.textContent = `:root { --base-color: ${colorHex}; }`;
             this._private.pickr1.hide();
         });
@@ -329,46 +332,61 @@ const card_main = {
     },
     // 아이콘 삭제 메서드
     deleteIcon(el, iconName) {
-        if (!confirm('아이콘을 삭제하시겠습니까?')) return;
-
-        const icon = _repository.icons.find(icon => icon.name === iconName);
-        if (icon) {
-            _repository.icons = _repository.icons.filter(icon => icon.name !== iconName);
-            el.closest('.item').remove();
-
-            ueye.toast.action({
-                status: 'success',
-                message: '아이콘이 삭제되었습니다.',
-                type : 'mini'
-            });
-        }
+        Swal.fire({
+            title: '선택한 아이콘을 삭제하시겠습니까?',
+            icon: "warning",
+            showCancelButton: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const icon = _repository.icons.find(icon => icon.name === iconName);
+                if (icon) {
+                    _repository.icons = _repository.icons.filter(icon => icon.name !== iconName);
+                    el.closest('.item').remove();
+                }
+                ueye.toast.action({
+                    status: 'success',
+                    message: '아이콘이 삭제되었습니다.',
+                    type : 'mini'
+                });
+            } else {
+                ueye.toast.action({
+                    status: 'success',
+                    message: '취소 되었습니다.',
+                    type : 'mini'
+                });
+            }
+        });
     },
     // 아이콘 선택 삭제 메서드
     deleteSelectedIcons() {
         const selectedIcons = document.querySelectorAll('input[name="iconSelect"]:checked');
         if (selectedIcons.length === 0) {
-            ueye.toast.action({
-                status: 'warning',
-                message: '삭제할 아이콘을 선택해주세요.',
-                type : 'mini'
+            Swal.fire({
+                title: '삭제할 아이콘을 선택해주세요.',
+                icon: "warning",
             });
             return;
         }
-        if (!confirm('선택한 아이콘을 삭제하시겠습니까?')) return;
-
-        // 선택된 아이콘 삭제
-        const iconNamesToDelete = Array.from(selectedIcons).map(cb => cb.value);
-        _repository.icons = _repository.icons.filter(icon => !iconNamesToDelete.includes(icon.name));
-        iconNamesToDelete.forEach(iconName => {
-            const item = document.querySelector(`.icon-card[data-icon-name="${iconName}"]`).closest('.item');
-            if (item) {
-                item.remove();
-            }
-        });
-        ueye.toast.action({
-            status: 'success',
-            message: `선택된 아이콘이 삭제되었습니다.`,
-            type : 'mini'
+        Swal.fire({
+            title: '선택한 아이콘을 삭제하시겠습니까?',
+            icon: "warning",
+            showCancelButton: true,
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+            // 선택된 아이콘 삭제
+            const iconNamesToDelete = Array.from(selectedIcons).map(cb => cb.value);
+            _repository.icons = _repository.icons.filter(icon => !iconNamesToDelete.includes(icon.name));
+            iconNamesToDelete.forEach(iconName => {
+                const item = document.querySelector(`.icon-card[data-icon-name="${iconName}"]`).closest('.item');
+                if (item) {
+                    item.remove();
+                }
+            });
+            ueye.toast.action({
+                status: 'success',
+                message: `선택된 아이콘이 삭제되었습니다.`,
+                type : 'mini'
+            });
         });
     }
 };
@@ -416,16 +434,21 @@ const edit_main = {
             }
         });
         if (icon === undefined) return;
+        const projectTitle = document.getElementById('projectTitle');
         const preview = document.getElementById('iconPreview');
         const iconNameTxt = document.getElementById('modalIconName');
         const iconNameInput = document.getElementById('editIconName');
         const iconTag = document.getElementById('modalIconTag');
         const iconCss = document.getElementById('modalIconCss');
+        const iconId = document.getElementById('modalIconId');
         const iconVariable = document.getElementById('modalIconVariable');
         const iconCode = document.getElementById('modalIconCode');
 
-        let fontPrefix = _repository.fontPrefix || document.getElementById('fontPrefix').value || '';
-        fontPrefix = fontPrefix == "" || fontPrefix == null ? '' : fontPrefix + '-';
+        let fontPrefix = '';
+        if (document.getElementById('useFontPrefix').checked) {
+            fontPrefix = _repository.fontPrefix || document.getElementById('fontPrefix').value;
+            fontPrefix = fontPrefix == "" || fontPrefix == null ? '' : fontPrefix + '-';
+        }
         const cls = `i-${fontPrefix}${icon.name}`;
 
         // 데이터 채우기
@@ -434,6 +457,7 @@ const edit_main = {
         iconCode.innerHTML = icon.code || "";
         iconTag.innerText = `<i class="${cls}" aria-hidden="true"></i>`;
         iconCss.innerHTML = `.${cls}`;
+        iconId.innerHTML = `${projectTitle.value}Stack.svg#${icon.name}`;
         iconVariable.innerHTML = `var(--i-${fontPrefix}${icon.name})`;
         iconNameInput.value = icon.name;
 
@@ -450,5 +474,5 @@ document.addEventListener('DOMContentLoaded', () => {
     layout_main.init();
     form_main.init();
     card_main.init();
-    edit_main.init(); 
+    edit_main.init();
 });

@@ -5,27 +5,29 @@
     <meta charset="UTF-8" />
     <title>SVG Icon Manager</title>
     
-    <link rel="stylesheet" href="./resources/css/common.css">
-    <link rel="stylesheet" href="./resources/font/SystemIcons.css">
-    <link rel="stylesheet" href="./resources/font/icons.css">
-	<!-- <link rel="stylesheet" href="./resources/css/style.css"> -->
-	<link rel="stylesheet" href="./resources/css/components.css">
-	<link rel="stylesheet" href="./resources/css/layout.css">
-	<link rel="stylesheet" href="./resources/css/main.css">
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="../font/SystemIcons.css">
+    <link rel="stylesheet" href="../font/icons.css">
+	<!-- <link rel="stylesheet" href="../css/style.css"> -->
+	<link rel="stylesheet" href="../css/components.css">
+	<link rel="stylesheet" href="../css/layout.css">
+	<link rel="stylesheet" href="../css/main.css">
 
     <!-- dayjs -->
-	<script src="./resources/js/libs/dayjs/dayjs.min.js"></script>
-	<script src="./resources/js/libs/dayjs/relativeTime.js"></script>
-    <script src="./resources/js/libs/Sortable.min.js"></script>
-    <script src="./resources/js/libs/svgjs/svg.min.js"></script>
-    <script src="./resources/js/libs/svgjs/svg.topath.min.js"></script>
-    <script src="./resources/js/libs/pickr/pickr.min.js"></script>
-    <link rel="stylesheet" href="./resources/js/libs/pickr/monolith.min.css">
+	<script src="../js/libs/dayjs/dayjs.min.js"></script>
+	<script src="../js/libs/dayjs/relativeTime.js"></script>
+    <script src="../js/libs/Sortable.min.js"></script>
+    <script src="../js/libs/svgjs/svg.min.js"></script>
+    <script src="../js/libs/svgjs/svg.topath.min.js"></script>
+    <script src="../js/libs/pickr/pickr.min.js"></script>
+    <link rel="stylesheet" href="../js/libs/pickr/monolith.min.css">
+    <script src="../js/libs/sweetalert2/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="../js/libs/sweetalert2/sweetalert2.min.css">
     
-    <script src="./resources/js/core.js"></script>
-    <script src="./resources/js/components.js"></script>
-    <script src="./resources/js/common.js"></script>
-    <script src="./resources/js/api.js"></script>
+    <script src="../js/core.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/common.js"></script>
+    <script src="../js/api.js"></script>
 
     <style>
         .card-header svg {display: block; max-height: 100%; margin: 0 auto;}
@@ -245,6 +247,14 @@
                                 <i class="i-c-css" aria-hidden="true"></i>
                                 <code id="modalIconCss"></code>
                                 <button type="button" class="btn-copy" onclick="copyCode('css')"><i class="i-copy"></i><span class="blind">COPY</span></button>
+                            </div>
+                        </div>
+                        <div class="item-copy col-6">
+                            <strong class="tit-sm">ID</strong>
+                            <div class="code-box">
+                                <i class="i-c-variable" aria-hidden="true"></i>
+                                <code id="modalIconId"></code>
+                                <button type="button" class="btn-copy" onclick="copyCode('id')"><i class="i-copy"></i><span class="blind">COPY</span></button>
                             </div>
                         </div>
                         <div class="item-copy col-6">

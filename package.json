@@ -2,6 +2,36 @@
   "name": "svgelectron",
   "version": "1.0.0",
   "main": "index.js",
+  "build": {
+    "appId": "com.nix.svgIconManager",
+    "productName": "svgIconManager",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "public/**/*",
+      "api/**/*",
+      "index.js",
+      "index.html",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets"
+    },
+    "asar": true
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
@@ -13,13 +43,15 @@
   "description": "",
   "devDependencies": {
     "electron": "^37.2.0",
-    "electron-builder": "^26.0.12",
-    "svgo": "^4.0.0"
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
+    "electron-is-dev": "^3.0.1",
+    "electron-log": "^5.4.1",
     "marked": "^16.0.0",
     "svg-sprite": "^2.0.4",
     "svg2ttf": "^6.0.3",
-    "svgicons2svgfont": "^15.0.1"
+    "svgicons2svgfont": "^15.0.1",
+    "svgo": "^4.0.0"
   }
 }
