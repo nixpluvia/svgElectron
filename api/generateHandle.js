@@ -137,7 +137,7 @@ module.exports = function () {
 			}
 		}
 		const cssPath = isDev
-		? path.join(__dirname, '../data/prototype.css')
+		? path.join(__dirname, '../public/data/prototype.css')
 		: path.join(__dirname, 'public', 'data', 'prototype.css');
 		const copyPath = path.join(folderPath, projectTitle + ".css");
 		let cssData = fs.readFileSync(cssPath, "utf8");
@@ -194,7 +194,7 @@ module.exports = function () {
 		}
 
 		const colorSet = data.projectInfo.colorSet;
-		const newIconsData = [];
+		let newIconsData = [];
 		if (colorSet && colorSet.length > 0) {
 			for (const icon of iconsData) {
 				icon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${data.projectInfo.baseColor}"`); // 기본 색상으로 변경
@@ -209,6 +209,8 @@ module.exports = function () {
 					newIconsData.push(clonedIcon);
 				}
 			}
+		} else {
+			newIconsData = iconsData;
 		}
 
 		const fontPrefix = data.projectInfo.fontPrefix || '';
@@ -279,14 +281,22 @@ module.exports = function () {
 					css: true,
 				}
 			},
-			stack: {
+			// stack: {
+			// 	dest: 'sprite',      // 결과 파일 저장 폴더
+			// 	sprite: 'stack.svg', // 스프라이트 SVG 파일명
+			// 	bust: false,       // 캐시방지용 query string 제거
+			// 	render: {
+			// 		css: false,
+			// 	}
+			// },
+			view : {
 				dest: 'sprite',      // 결과 파일 저장 폴더
-				sprite: 'stack.svg', // 스프라이트 SVG 파일명
+				sprite: 'view.svg', // 스프라이트 SVG 파일명
 				bust: false,       // 캐시방지용 query string 제거
 				render: {
 					css: false,
 				}
-			},
+			}
 		}
 	}
 	/**
@@ -305,7 +315,9 @@ module.exports = function () {
 		}
 		const projectTitle = data.projectInfo.title;
 		const colorSet = data.projectInfo.colorSet;
-		const newIconsData = [];
+		const fontPrefix = data.projectInfo.fontPrefix || '';
+		const prefix = fontPrefix !== '' ? `i-${fontPrefix}-` : 'i-';
+		let newIconsData = [];
 		if (colorSet && colorSet.length > 0) {
 			for (const icon of iconsData) {
 				icon.data = icon.data.replace(/fill="[^"]*"/g, `fill="${data.projectInfo.baseColor}"`); // 기본 색상으로 변경
@@ -320,6 +332,8 @@ module.exports = function () {
 					newIconsData.push(clonedIcon);
 				}
 			}
+		} else {
+			newIconsData = iconsData;
 		}
 
 		const newFolderPath = path.join(folderPath, "sprite");
@@ -328,14 +342,16 @@ module.exports = function () {
 		}
 		spriteConfig.mode.css.dest = newFolderPath; // 결과 파일 저장 폴더
 		spriteConfig.mode.css.sprite = projectTitle + "Sprite.svg"; // 스프라이트 SVG 파일명
-		spriteConfig.mode.stack.dest = newFolderPath; // 결과 파일 저장 폴더
-		spriteConfig.mode.stack.sprite = projectTitle + "Stack.svg"; // 스택 SVG 파일명
+		// spriteConfig.mode.stack.dest = newFolderPath; // 결과 파일 저장 폴더
+		// spriteConfig.mode.stack.sprite = projectTitle + "Stack.svg"; // 스택 SVG 파일명
+		spriteConfig.mode.view.dest = newFolderPath; // 결과 파일 저장 폴더
+		spriteConfig.mode.view.sprite = projectTitle + "View.svg"; // 뷰 SVG 파일명
 		const sprite = new Sprite(spriteConfig);
 		const fakePath = '/virtual/path/';
 		for (const icon of newIconsData) {
 			if (icon.data && icon.data.trim() !== "") {
 				try {
-					sprite.add(fakePath + icon.name + ".svg", icon.name + ".svg", icon.data);
+					sprite.add(fakePath + prefix + icon.name + ".svg", prefix + icon.name + ".svg", icon.data);
 
 				} catch (err) {
 					console.error(`Error optimizing icon ${icon.name}:`, err);

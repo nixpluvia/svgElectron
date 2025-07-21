@@ -180,7 +180,7 @@ const select_util = {
                     <div class="f-color">
                         <span style="background-color: ${colorHex};"></span>
                         <input type="text" name="colorSet" class="f-control" data-size="xs" data-color="${colorHex}" value="${d.suffix || ''}" placeholder="접미사(suffix)">
-                        <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="layout_main.deleteColor(this)"><i class="i-close"></i></button>
+                        <button type="button" class="btn" data-size="xs" data-level="1" data-s="outline" onclick="form_main.deleteColor(this)"><i class="i-close"></i></button>
                     </div>
                 `;
                 colorForms.insertAdjacentHTML('beforeend', html);
@@ -322,10 +322,10 @@ function renderCard(data) {
                 </div>
                 <div class="content">
                     ${icon.data}
-                    <button type="button" class="btn-copy" onclick="edit_main.showEditModal('${icon.name}')"><span class="blind">COPY</span></button>
+                    <button type="button" class="btn-copy" onclick="edit_main.showEditModal(this)"><span class="blind">COPY</span></button>
                 </div>
-                <button type="button" class="btn-title" onclick="copyCode('data', '${icon.name}')"><strong class="tit-xs">${icon.name || '이름없음'}</strong></button>
-                <button type="button" class="btn-del" onclick="card_main.deleteIcon(this, '${icon.name}')"><i class="i-delete"></i><span class="blind">삭제</span></button>
+                <button type="button" class="btn-title" onclick="copyCode('data', this)"><strong class="tit-xs">${icon.name || '이름없음'}</strong></button>
+                <button type="button" class="btn-del" onclick="card_main.deleteIcon(this)"><i class="i-delete"></i><span class="blind">삭제</span></button>
             </div>
         `
         fragment.appendChild(col);

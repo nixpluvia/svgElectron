@@ -40,7 +40,7 @@ async function showGuideModal() {
 }
 
 // 클립보드 코드 복사 메서드
-function copyCode(type, iconName) {
+function copyCode(type, el) {
     let targetElement;
     if (type === 'tag') {
         targetElement = document.getElementById('modalIconTag');
@@ -53,6 +53,7 @@ function copyCode(type, iconName) {
     } else if (type === 'id') {
         targetElement = document.getElementById('modalIconId');
     } else if (type === 'data') {
+        const iconName = el.closest('.icon-card').getAttribute('data-icon-name');
         if (iconName) {
             let fontPrefix = _repository.fontPrefix || document.getElementById('fontPrefix').value || '';
             fontPrefix = fontPrefix == "" || fontPrefix == null ? '' : fontPrefix + '-';
@@ -331,7 +332,10 @@ const card_main = {
         checkboxes.forEach(cb => cb.checked = !allChecked);
     },
     // 아이콘 삭제 메서드
-    deleteIcon(el, iconName) {
+    deleteIcon(el) {
+        const iconCard = el.closest('.icon-card');
+        if (!iconCard) return;
+        const iconName = iconCard.getAttribute('data-icon-name');
         Swal.fire({
             title: '선택한 아이콘을 삭제하시겠습니까?',
             icon: "warning",
@@ -417,7 +421,8 @@ const edit_main = {
             const iconNameInput = document.getElementById('editIconName');
             const iconCardItem = document.querySelector('#iconCards .icon-card[data-icon-name="' + data.name + '"]');
             iconCardItem.setAttribute('data-icon-name', iconNameInput.value);
-            iconCardItem.querySelector('.tit-sm').innerHTML = iconNameInput.value;
+            iconCardItem.querySelector('.btn-title .tit-xs').innerHTML = iconNameInput.value;
+            iconCardItem.querySelector('input[name="iconSelect"]').value = iconNameInput.value;
             data.name = iconNameInput.value;
 
             // 모달 닫기
@@ -425,7 +430,8 @@ const edit_main = {
         });
     },
     // 모달 창 열기 메서드
-    showEditModal(iconName) {
+    showEditModal(el) {
+        const iconName = el.closest('.icon-card').getAttribute('data-icon-name');
         let iconIdx = null;
         const icon = _repository.icons.find((icon, idx) => {
             if (icon.name === iconName) {
