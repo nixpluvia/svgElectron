@@ -281,14 +281,14 @@ module.exports = function () {
 					css: true,
 				}
 			},
-			// stack: {
-			// 	dest: 'sprite',      // 결과 파일 저장 폴더
-			// 	sprite: 'stack.svg', // 스프라이트 SVG 파일명
-			// 	bust: false,       // 캐시방지용 query string 제거
-			// 	render: {
-			// 		css: false,
-			// 	}
-			// },
+			stack: {
+				dest: 'sprite',      // 결과 파일 저장 폴더
+				sprite: 'stack.svg', // 스프라이트 SVG 파일명
+				bust: false,       // 캐시방지용 query string 제거
+				render: {
+					css: false,
+				}
+			},
 			view : {
 				dest: 'sprite',      // 결과 파일 저장 폴더
 				sprite: 'view.svg', // 스프라이트 SVG 파일명
@@ -342,8 +342,8 @@ module.exports = function () {
 		}
 		spriteConfig.mode.css.dest = newFolderPath; // 결과 파일 저장 폴더
 		spriteConfig.mode.css.sprite = projectTitle + "Sprite.svg"; // 스프라이트 SVG 파일명
-		// spriteConfig.mode.stack.dest = newFolderPath; // 결과 파일 저장 폴더
-		// spriteConfig.mode.stack.sprite = projectTitle + "Stack.svg"; // 스택 SVG 파일명
+		spriteConfig.mode.stack.dest = newFolderPath; // 결과 파일 저장 폴더
+		spriteConfig.mode.stack.sprite = projectTitle + "Stack.svg"; // 스택 SVG 파일명
 		spriteConfig.mode.view.dest = newFolderPath; // 결과 파일 저장 폴더
 		spriteConfig.mode.view.sprite = projectTitle + "View.svg"; // 뷰 SVG 파일명
 		const sprite = new Sprite(spriteConfig);
